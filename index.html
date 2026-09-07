@@ -4,58 +4,59 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Pereselah — Pause. Reflect. Return.</title>
+<meta name="theme-color" content="#3E2A10">
 <link rel="manifest" href="manifest.json">
 <link rel="icon" href="icon-192.png" type="image/png">
 <link rel="apple-touch-icon" href="icon-192.png">
-<meta name="description" content="Pereselah is a daily devotional companion. One verse, written out before you like ink on parchment, a quiet space to reflect, and a streak to keep you coming back.">
-<meta property="og:title" content="Pereselah — Pause. Reflect. Return.">
-<meta property="og:description" content="One verse a day, written out like ink on parchment. A quiet space to reflect. A streak to keep you coming back.">
-<meta name="theme-color" content="#DCCFA8">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;600;700&family=Cinzel:wght@500;600&family=EB+Garamond:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
 <style>
   *{ margin:0; padding:0; box-sizing:border-box; }
-  html{ scroll-behavior: smooth; }
+  .hidden{ display:none !important; }
   body{
-    background: #DCCFA8; color: #3E2A10; font-family: 'EB Garamond', serif; line-height: 1.6;
-  }
-  a{ color:inherit; text-decoration:none; }
-  .cinzel{ font-family: 'Cinzel', serif; }
-  .caveat{ font-family: 'Caveat', cursive; }
-  .wrap{ max-width: 1080px; margin: 0 auto; padding: 0 28px; }
-  .reveal{ opacity:0; transform: translateY(16px); transition: opacity 0.7s ease, transform 0.7s ease; }
-  .reveal.in{ opacity:1; transform: translateY(0); }
-
-  .paper-bg{
     background:
       radial-gradient(ellipse at 20% 15%, rgba(140,110,60,0.08) 0%, transparent 45%),
       radial-gradient(ellipse at 80% 85%, rgba(140,110,60,0.10) 0%, transparent 50%),
       #DCCFA8;
+    color: #3E2A10; font-family: 'EB Garamond', serif; line-height: 1.6;
   }
+  .cinzel{ font-family:'Cinzel',serif; }
+  .caveat{ font-family:'Caveat',cursive; }
+  .wrap{ max-width: 560px; margin: 0 auto; padding: 0 20px; }
 
-  nav{ display:flex; align-items:center; justify-content:space-between; padding: 26px 28px; }
-  .logo{ font-family:'Cinzel',serif; font-size:15px; letter-spacing:3px; color:#6B4E20; font-weight:600; }
-  .nav-links{ display:flex; gap: 30px; font-size: 15px; color: #6B4E20; }
-  .nav-links a:hover{ color: #3E2A10; }
-  .nav-cta{ font-size: 14px; padding: 9px 20px; border-radius: 20px; border: 1px solid #B89858; color:#3E2A10; }
-  .nav-cta:hover{ background: rgba(184,152,88,0.15); }
-  @media (max-width: 700px){ .nav-links{ display:none; } }
+  header{ padding: 34px 20px 6px; text-align:center; }
+  .wordmark{ font-family:'Cinzel',serif; font-size: 17px; letter-spacing: 3px; color:#6B4E20; font-weight:600; }
+  .tagline{ font-size: 13px; color: #8A6E3A; font-style: italic; margin-top: 4px; }
 
-  .hero{ padding: 20px 28px 10px; text-align:center; }
-  .eyebrow{
-    display:inline-block; font-family:'Cinzel',serif; font-size: 11px; letter-spacing: 2px;
-    color:#8A6E3A; margin-bottom: 20px;
+  .streak-row{ display:flex; justify-content:center; gap:10px; padding: 18px 20px 0; align-items:center; }
+  .controls-row{ display:flex; align-items:flex-start; justify-content:center; gap:18px; padding: 16px 20px 0; }
+  .tools-col{ display:flex; flex-direction:column; align-items:center; position:relative; }
+  .tools-label, .plan-choose-label{ font-size:10.5px; color:#8A6E3A; margin-top:6px; letter-spacing:0.4px; }
+  .plan-col{ display:flex; flex-direction:column; align-items:center; }
+  .plan-select{
+    background: rgba(255,250,235,0.6); border:1px solid #B89858; color:#3E2A10; font-size:13px;
+    padding: 8px 16px; border-radius: 20px; font-family:'EB Garamond',serif; cursor:pointer;
   }
-  h1{ font-size: 40px; font-weight: 500; margin-bottom: 16px; font-family: 'EB Garamond', serif; }
-  .hero p.sub{ font-size: 17px; color: #6B5636; max-width: 460px; margin: 0 auto 30px; }
-  .cta-row{ display:flex; gap: 14px; justify-content:center; flex-wrap:wrap; margin-bottom: 40px; }
-  .btn-primary{ background: #3E2A10; color: #F1E4C0; font-weight: 500; font-size: 15px; padding: 13px 26px; border-radius: 8px; }
-  .btn-primary:hover{ opacity:0.9; }
-  .btn-ghost{ font-size: 15px; padding: 13px 22px; border: 1px solid #B89858; border-radius: 8px; }
-  .btn-ghost:hover{ background: rgba(184,152,88,0.12); }
-  @media (max-width: 480px){ h1{ font-size: 30px; } }
+  .plan-day-label{ text-align:center; font-size:11.5px; color:#8A6E3A; margin-top:8px; font-style:italic; }
+  .reminder-row{
+    display:flex; justify-content:center; align-items:center; gap:10px; padding: 14px 20px 0;
+  }
+  .reminder-toggle{
+    background:none; border:1px solid #B89858; color:#6B4E20; font-size:12px; padding:6px 14px;
+    border-radius:20px; cursor:pointer; font-family:'EB Garamond',serif;
+  }
+  .reminder-toggle.on{ background: rgba(198,154,72,0.25); }
+  .reminder-time{
+    border:1px solid #B89858; border-radius: 20px; padding:5px 10px; font-family:'EB Garamond',serif;
+    font-size:12px; color:#3E2A10; background: rgba(255,250,235,0.6);
+  }
+  .streak-badge{
+    display:flex; align-items:center; gap:6px; border: 1px solid #B89858; color:#6B4E20;
+    padding: 5px 14px; border-radius: 20px; font-size: 12.5px;
+  }
+  .date-label{ font-size: 12px; color: #8A6E3A; }
 
-  .scroll-wrap{ max-width: 480px; margin: 0 auto 60px; padding: 0 20px; }
+  .scroll-wrap{ margin: 22px 0 0; }
   .rod{
     height: 20px; position: relative; z-index: 2; border-radius: 10px;
     background: linear-gradient(180deg, #8A5A2E 0%, #6B4423 22%, #4A2E15 55%, #6B4423 80%, #8A5A2E 100%);
@@ -69,7 +70,7 @@
   .rod::before{ left: -12px; }
   .rod::after{ right: -12px; }
   .parchment{
-    position: relative; margin: -2px 6px 0; padding: 38px 34px 32px;
+    position: relative; margin: -2px 6px 0; padding: 34px 30px 28px;
     background: linear-gradient(135deg, #F1E4C0 0%, #E9D9AC 50%, #EFE0B8 100%);
     box-shadow:
       inset 0 12px 20px -12px rgba(60,40,10,0.35), inset 0 -12px 20px -12px rgba(60,40,10,0.35),
@@ -77,121 +78,171 @@
       0 18px 44px -18px rgba(40,25,10,0.4);
     text-align:center; z-index:1;
   }
-  .verse-box{ min-height: 96px; display:flex; align-items:center; justify-content:center; }
-  .verse-line{ font-family:'Caveat',cursive; font-size: 26px; color:#3E2A10; line-height:1.5; max-width: 360px; }
+  .verse-box{ min-height: 92px; display:flex; align-items:center; justify-content:center; }
+  .verse-line{ font-family:'Caveat',cursive; font-size: 24px; color:#3E2A10; line-height:1.5; max-width: 380px; }
   .quill{ display:inline-block; margin-left:2px; animation: quillbob 0.5s ease-in-out infinite alternate; transform-origin: bottom left; }
   @keyframes quillbob{ from{ transform: rotate(-6deg) translateY(0); } to{ transform: rotate(4deg) translateY(-2px); } }
-  .verse-ref{ margin-top:16px; font-style: italic; font-size: 13.5px; color:#8A6E3A; opacity:0; transition: opacity 0.6s ease; }
+  .verse-ref{ margin-top:14px; font-style: italic; font-size: 13px; color:#8A6E3A; opacity:0; transition: opacity 0.6s ease; }
   .verse-ref.show{ opacity:1; }
-
-  .section{ padding: 50px 28px; max-width: 1080px; margin: 0 auto; }
-  .section-head{ text-align:center; max-width: 480px; margin: 0 auto 40px; }
-  .section-eyebrow{ font-family:'Cinzel',serif; font-size: 11px; color:#8A6E3A; letter-spacing:2px; margin-bottom: 10px; }
-  .section-title{ font-size: 26px; font-weight: 500; }
-
-  .features{ display:grid; grid-template-columns: repeat(4,1fr); gap: 16px; }
-  .feature{
-    background: linear-gradient(135deg,#F1E4C0,#E9D9AC); border-radius: 4px; padding: 24px 20px;
-    box-shadow: 0 10px 24px -14px rgba(40,25,10,0.3), inset 0 0 0 1px rgba(184,152,88,0.35);
-    position:relative;
+  .verse-actions{ display:flex; justify-content:center; gap:10px; margin-top:18px; }
+  .verse-btn{
+    background:none; border:1px solid #B89858; color:#6B4E20; font-size:12px; padding:7px 14px;
+    border-radius: 20px; cursor:pointer; font-family:'EB Garamond',serif;
   }
-  .feature::before{
-    content:''; position:absolute; top:10px; right:10px; width:8px; height:8px; border-radius:50%;
-    background: radial-gradient(circle at 35% 30%, #C69A48, #8A6E3A);
+  .verse-btn.saved{ background: rgba(198,154,72,0.2); }
+  .verse-btn.speaking{ background: rgba(198,154,72,0.3); }
+
+  .basket-btn{
+    background: rgba(255,250,235,0.85);
+    border:1px solid #B89858; width:38px; height:38px; border-radius:50%; font-size:17px;
+    cursor:pointer; display:flex; align-items:center; justify-content:center;
   }
-  .feature h3{ font-size: 15.5px; font-weight: 500; margin-bottom: 8px; }
-  .feature p{ font-size: 13px; color: #6B5636; line-height: 1.6; }
-  @media (max-width: 780px){ .features{ grid-template-columns: 1fr 1fr; } }
-  @media (max-width: 480px){ .features{ grid-template-columns: 1fr; } }
-
-  .story{ max-width: 600px; margin: 0 auto; text-align:center; }
-  .story p{ font-size: 16px; color: #6B5636; margin-bottom: 16px; }
-  .story p:last-child{ font-family:'Caveat',cursive; font-size: 24px; color:#3E2A10; }
-
-  .cta-band{
-    margin: 10px 28px 80px; padding: 50px 40px; border-radius: 6px; text-align:center;
-    background: linear-gradient(135deg,#3E2A10,#2A1B08); color: #F1E4C0;
+  .basket-menu{
+    position:absolute; top:70px; left:0; z-index:6; background: linear-gradient(135deg,#F1E4C0,#E9D9AC);
+    border:1px solid #B89858; border-radius:10px; padding:6px; min-width:170px;
+    box-shadow: 0 14px 30px -12px rgba(40,25,10,0.4);
   }
-  .cta-band h2{ font-size: 26px; font-weight:500; margin-bottom: 12px; }
-  .cta-band p{ color: #C9B98A; font-size: 14px; margin-bottom: 24px; }
-  .cta-band .btn-primary{ background: #C69A48; color: #3B2A0C; font-weight:600; }
+  .basket-menu button{
+    display:flex; align-items:center; gap:8px; width:100%; text-align:left; background:none; border:none;
+    color:#3E2A10; font-size:13.5px; padding:9px 10px; border-radius:6px; cursor:pointer; font-family:'EB Garamond',serif;
+  }
+  .basket-menu button:hover{ background: rgba(184,152,88,0.2); }
 
-  footer{ padding: 26px 28px; border-top: 1px solid #C9B072; display:flex; justify-content:space-between; color: #6B5636; font-size: 12.5px; flex-wrap:wrap; gap:10px; }
+  .reflect-card{
+    margin: 20px 6px 0; background: linear-gradient(135deg,#F1E4C0,#E9D9AC); border-radius: 6px;
+    padding: 24px 26px; box-shadow: 0 12px 28px -16px rgba(40,25,10,0.35), inset 0 0 0 1px rgba(184,152,88,0.3);
+  }
+  .reflect-label{ font-family:'Cinzel',serif; font-size: 11px; letter-spacing:1.5px; color:#8A6E3A; margin-bottom: 10px; }
+  .reflect-prompt{ font-family:'Caveat',cursive; font-size: 18px; color:#3E2A10; margin-bottom: 14px; }
+  textarea#reflectionInput{
+    width:100%; min-height: 100px; border: 1px solid #C9AF75; border-radius: 4px; padding: 12px;
+    font-family: 'EB Garamond', serif; font-size: 15px; color:#3E2A10; background: rgba(255,250,235,0.5);
+    resize: vertical; outline:none;
+  }
+  textarea#reflectionInput:focus{ border-color: #6B4E20; }
+  .reflect-save-row{ display:flex; justify-content:space-between; align-items:center; margin-top:12px; }
+  .reflect-hint{ font-size: 11.5px; color: #8A6E3A; }
+  .reflect-save-btn{
+    background:#3E2A10; color:#F1E4C0; border:none; font-size:12.5px; padding:9px 18px;
+    border-radius: 20px; cursor:pointer; font-family:'EB Garamond',serif;
+  }
+  .saved-note{ font-size: 11.5px; color:#4F6B3E; opacity:0; transition: opacity 0.3s; }
+  .saved-note.show{ opacity:1; }
+
+  .tabs{ display:flex; gap:8px; margin: 26px 6px 0; }
+  .tab-btn{
+    flex:1; background: none; border: 1px solid #B89858; color:#6B4E20; font-size:12.5px; padding:9px;
+    border-radius: 20px; cursor:pointer; font-family:'EB Garamond',serif;
+  }
+  .tab-btn.active{ background:#3E2A10; color:#F1E4C0; border-color:#3E2A10; }
+
+  .history{ padding: 18px 6px 90px; }
+  .hist-empty{ text-align:center; color:#8A6E3A; padding: 36px 18px; font-size:14px; }
+  .hist-empty .caveat{ font-size: 19px; color: #3E2A10; margin-bottom:6px; display:block; }
+  .hist-item{
+    background: rgba(255,250,235,0.6); border: 1px solid #C9AF75; border-radius: 6px;
+    padding: 15px 16px; margin-bottom: 10px;
+  }
+  .hist-date{ font-size: 10.5px; color: #8A6E3A; margin-bottom: 6px; }
+  .hist-verse-ref{ font-size: 11.5px; color: #8A5A1E; margin-bottom: 4px; }
+  .hist-verse-text{ font-family:'Caveat',cursive; font-size: 16px; color: #6B5636; margin-bottom: 8px; }
+  .hist-reflection{ font-size: 14px; color: #3E2A10; white-space: pre-wrap; }
+
+  .fav-item{
+    background: rgba(255,250,235,0.6); border: 1px solid #C9AF75; border-radius: 6px;
+    padding: 15px 16px; margin-bottom: 10px;
+  }
+  .fav-ref{ font-size: 11.5px; color: #8A5A1E; margin-bottom: 6px; }
+  .fav-text{ font-family:'Caveat',cursive; font-size: 17px; }
+
+  footer{ text-align:center; padding: 20px 20px 40px; color: #8A6E3A; font-size: 11px; letter-spacing: 1px; }
 </style>
 </head>
-<body class="paper-bg">
+<body>
 
-<nav>
-  <div class="logo">PERESELAH</div>
-  <div class="nav-links">
-    <a href="#today">Today's verse</a>
-    <a href="#how">How it works</a>
-  </div>
-  <a href="app.html" class="nav-cta">Open Pereselah</a>
-</nav>
+<header>
+  <div class="wordmark">PERESELAH</div>
+  <div class="tagline">Pause. Reflect. Return.</div>
+</header>
 
-<section class="hero">
-  <div class="eyebrow">SELAH — PAUSE AND REFLECT</div>
-  <h1>A quiet moment with God,<br>written out before you.</h1>
-  <p class="sub">One verse a day, revealed like ink on parchment. A few honest minutes to reflect. A streak that gently keeps you returning.</p>
-  <div class="cta-row">
-    <a href="app.html" class="btn-primary">Start today's reading</a>
-    <a href="#today" class="btn-ghost">See today's verse</a>
-  </div>
-</section>
-
-<div class="scroll-wrap" id="today">
-  <div class="rod"></div>
-  <div class="parchment">
-    <div class="verse-box">
-      <div class="verse-line" id="verseLine"></div>
-    </div>
-    <div class="verse-ref" id="verseRef"></div>
-  </div>
-  <div class="rod"></div>
+<div class="streak-row">
+  <span class="streak-badge">🔥 <span id="streakCount">0</span> day streak</span>
+  <span class="date-label" id="todayLabel"></span>
 </div>
 
-<section class="section reveal" id="how">
-  <div class="section-head">
-    <div class="section-eyebrow">HOW IT WORKS</div>
-    <div class="section-title">Small enough to keep. Deep enough to matter.</div>
-  </div>
-  <div class="features">
-    <div class="feature">
-      <h3>One verse a day</h3>
-      <p>Written out before you each morning, like ink finding the page. Nothing to scroll past.</p>
-    </div>
-    <div class="feature">
-      <h3>Private reflection</h3>
-      <p>A quiet space for your own words. Never shared, never posted — yours alone.</p>
-    </div>
-    <div class="feature">
-      <h3>A gentle streak</h3>
-      <p>Not a guilt trip — just a quiet record of the days you showed up.</p>
-    </div>
-    <div class="feature">
-      <h3>Keep what stays with you</h3>
-      <p>Save the verses that speak to you, ready to return to whenever you need them.</p>
+<div class="controls-row">
+  <div class="tools-col">
+    <button class="basket-btn" id="basketBtn" aria-label="Verse actions" title="Verse actions">🧺</button>
+    <div class="tools-label">Tools</div>
+    <div class="basket-menu hidden" id="basketMenu">
+      <button id="replayBtn">✒ Rewrite</button>
+      <button id="saveVerseBtn">♡ Save</button>
+      <button id="shareVerseBtn">Copy text</button>
+      <button id="downloadVerseBtn">⬇ Download</button>
+      <button id="listenBtn">🔊 Listen</button>
+      <button id="shareWaBtn">↗ Share</button>
     </div>
   </div>
-</section>
+  <div class="plan-col">
+    <select class="plan-select" id="planSelect">
+      <option value="random">Random verse</option>
+      <option value="peace">Peace (7 days)</option>
+      <option value="faith">Faith (7 days)</option>
+      <option value="strength">Strength (7 days)</option>
+      <option value="love">Love (7 days)</option>
+      <option value="hope">Hope (7 days)</option>
+      <option value="gratitude">Gratitude (7 days)</option>
+      <option value="wisdom">Wisdom (7 days)</option>
+      <option value="comfort">Comfort (7 days)</option>
+      <option value="revelation">Revelation (7 days)</option>
+      <option value="forgiveness">Forgiveness (7 days)</option>
+      <option value="joy">Joy (7 days)</option>
+    </select>
+    <div class="plan-choose-label">Choose your reading plan</div>
+  </div>
+</div>
+<div class="plan-day-label" id="planDayLabel"></div>
 
-<section class="section reveal">
-  <div class="story">
-    <p>Most days are loud. Pereselah is built to be the opposite — one verse, written slowly, and a few honest minutes with nothing else competing for your attention.</p>
-    <p>"Selah" — pause, and reflect.</p>
-  </div>
-</section>
+<div class="reminder-row">
+  <button class="reminder-toggle" id="reminderToggle">🔔 Daily reminder</button>
+  <input type="time" class="reminder-time" id="reminderTime" value="07:00">
+</div>
 
-<div class="cta-band reveal">
-  <h2>Begin today's Selah.</h2>
-  <p>Free to use. No account needed to start.</p>
-  <a href="app.html" class="btn-primary">Open Pereselah</a>
+<div class="wrap">
+  <div class="scroll-wrap">
+    <div class="rod"></div>
+    <div class="parchment">
+      <div class="verse-box">
+        <div class="verse-line" id="verseLine"></div>
+      </div>
+      <div class="verse-ref" id="verseRef"></div>
+    </div>
+    <div class="rod"></div>
+  </div>
+
+  <div class="reflect-card">
+    <div class="reflect-label">TODAY'S REFLECTION</div>
+    <div class="reflect-prompt" id="reflectPrompt">What does this verse mean for you today?</div>
+    <textarea id="reflectionInput" placeholder="Write a few thoughts..."></textarea>
+    <div class="reflect-save-row">
+      <span class="saved-note" id="savedNote">Saved</span>
+      <button class="reflect-save-btn" id="saveReflectionBtn">Save reflection</button>
+    </div>
+  </div>
+
+  <div class="tabs">
+    <button class="tab-btn active" data-tab="history">Journal</button>
+    <button class="tab-btn" data-tab="favorites">Saved verses</button>
+  </div>
+
+  <div class="history" id="historyPanel"></div>
+  <div class="history" id="favoritesPanel" style="display:none;"></div>
 </div>
 
 <footer>
-  <div>© 2026 Pereselah</div>
-  <div id="creditLine">Made by PereFalc</div>
+  <div>PERESELAH · MADE FOR QUIET MORNINGS</div>
+  <div id="creditLine" style="margin-top:6px;">Made by PereFalc</div>
+  <div style="margin-top:4px;">© 2026 Pereselah</div>
 </footer>
 
 <svg width="0" height="0" style="position:absolute">
@@ -207,7 +258,7 @@
   var domain = 'yahoo.com';
   var address = user + '@' + domain;
   var el = document.getElementById('creditLine');
-  el.innerHTML = 'Made by PereFalc \u00b7 <a href="mailto:' + address + '" style="text-decoration:underline;">' + address + '</a>';
+  el.innerHTML = 'Made by PereFalc \u00b7 <a href="mailto:' + address + '" style="text-decoration:underline;color:inherit;">' + address + '</a>';
 })();
 </script>
 
@@ -221,6 +272,7 @@
 
 <script>
 (function(){
+  // ONLINE pool — 120 references, text fetched live from the API when a connection is available
   var VERSE_LIST = [
     'John 3:16','Psalm 23:1','Proverbs 3:5-6','Philippians 4:13','Romans 8:28',
     'Jeremiah 29:11','Isaiah 41:10','Psalm 46:1','Matthew 6:33','Joshua 1:9',
@@ -253,8 +305,21 @@
     'Colossians 3:2','1 Thessalonians 5:16-18','1 Timothy 4:12','2 Timothy 3:16-17','2 Timothy 4:7',
     'Hebrews 4:16','Hebrews 12:1-2','Hebrews 13:5-6','James 1:5','James 1:12',
     'James 4:7-8','1 Peter 1:3','1 Peter 2:9','1 Peter 3:15','1 Peter 4:8',
-    '1 John 1:9','1 John 4:7-8','1 John 4:18','1 John 5:14','Revelation 3:20','Revelation 21:4'
+    '1 John 1:9','1 John 4:7-8','1 John 4:18','1 John 5:14','Revelation 3:20','Revelation 21:4',
+    'Numbers 6:24-26','Deuteronomy 6:5','1 Samuel 17:47','2 Samuel 22:31','2 Chronicles 7:14',
+    'Nehemiah 4:14','Esther 4:14','Job 1:21','Job 42:2','Psalm 2:11',
+    'Psalm 33:11','Psalm 40:1-3','Psalm 61:2','Psalm 63:1','Psalm 68:19',
+    'Psalm 71:5','Psalm 77:11','Psalm 84:10','Psalm 89:1','Psalm 96:1',
+    'Psalm 105:4','Psalm 111:10','Psalm 116:1-2','Psalm 130:5','Psalm 133:1',
+    'Psalm 145:18','Proverbs 2:6','Proverbs 10:12','Proverbs 12:25','Proverbs 13:20',
+    'Proverbs 19:21','Proverbs 21:1','Proverbs 29:18','Isaiah 1:18','Isaiah 12:2',
+    'Isaiah 25:1','Isaiah 30:15','Isaiah 49:15-16','Isaiah 61:1','Jeremiah 1:5',
+    'Hosea 6:3','Revelation 1:8','Revelation 21:5','Revelation 22:13','Revelation 3:11',
+    'Revelation 12:11','Matthew 6:14-15','Colossians 3:13','Mark 11:25','Luke 6:37',
+    'Psalm 103:12','John 15:11','Philippians 4:4'
   ];
+
+  // OFFLINE fallback — 40 verses with the actual KJV text built in, used when the API can't be reached
   var OFFLINE_VERSES = [
     { ref: 'John 3:16', text: 'For God so loved the world, that he gave his only begotten Son, that whosoever believeth in him should not perish, but have everlasting life.' },
     { ref: 'Psalm 23:1', text: 'The LORD is my shepherd; I shall not want.' },
@@ -295,15 +360,168 @@
     { ref: 'Psalm 55:22', text: 'Cast thy burden upon the LORD, and he shall sustain thee: he shall never suffer the righteous to be moved.' },
     { ref: 'Ephesians 2:8-9', text: 'For by grace are ye saved through faith; and that not of yourselves: it is the gift of God: not of works, lest any man should boast.' },
     { ref: 'Psalm 73:26', text: 'My flesh and my heart faileth: but God is the strength of my heart, and my portion for ever.' },
-    { ref: 'Psalm 46:10', text: 'Be still, and know that I am God: I will be exalted among the heathen, I will be exalted in the earth.' }
+    { ref: 'Psalm 46:10', text: 'Be still, and know that I am God: I will be exalted among the heathen, I will be exalted in the earth.' },
+    { ref: 'Isaiah 26:3', text: 'Thou wilt keep him in perfect peace, whose mind is stayed on thee: because he trusteth in thee.' },
+    { ref: 'John 14:27', text: 'Peace I leave with you, my peace I give unto you: not as the world giveth, give I unto you. Let not your heart be troubled, neither let it be afraid.' },
+    { ref: 'Psalm 4:8', text: 'I will both lay me down in peace, and sleep: for thou, LORD, only makest me dwell in safety.' },
+    { ref: 'Mark 11:24', text: 'Therefore I say unto you, What things soever ye desire, when ye pray, believe that ye receive them, and ye shall have them.' },
+    { ref: 'Mark 9:23', text: 'Jesus said unto him, If thou canst believe, all things are possible to him that believeth.' },
+    { ref: 'Romans 10:9-10', text: 'That if thou shalt confess with thy mouth the Lord Jesus, and shalt believe in thine heart that God hath raised him from the dead, thou shalt be saved. For with the heart man believeth unto righteousness; and with the mouth confession is made unto salvation.' },
+    { ref: 'Luke 1:37', text: 'For with God nothing shall be impossible.' },
+    { ref: 'Habakkuk 3:19', text: 'The LORD God is my strength, and he will make my feet like hinds\u2019 feet, and he will make me to walk upon mine high places.' },
+    { ref: 'Romans 5:8', text: 'But God commendeth his love toward us, in that, while we were yet sinners, Christ died for us.' },
+    { ref: 'Ephesians 4:32', text: 'And be ye kind one to another, tenderhearted, forgiving one another, even as God for Christ\u2019s sake hath forgiven you.' },
+    { ref: '1 John 4:7-8', text: 'Beloved, let us love one another: for love is of God; and every one that loveth is born of God, and knoweth God. He that loveth not knoweth not God; for God is love.' },
+    { ref: '1 John 4:18', text: 'There is no fear in love; but perfect love casteth out fear: because fear hath torment. He that feareth is not made perfect in love.' },
+    { ref: 'John 15:13', text: 'Greater love hath no man than this, that a man lay down his life for his friends.' },
+    { ref: 'Romans 15:13', text: 'Now the God of hope fill you with all joy and peace in believing, that ye may abound in hope, through the power of the Holy Ghost.' },
+    { ref: 'Psalm 42:1', text: 'As the hart panteth after the water brooks, so panteth my soul after thee, O God.' },
+    { ref: '1 Thessalonians 5:16-18', text: 'Rejoice evermore. Pray without ceasing. In every thing give thanks: for this is the will of God in Christ Jesus concerning you.' },
+    { ref: 'James 1:5', text: 'If any of you lack wisdom, let him ask of God, that giveth to all men liberally, and upbraideth not; and it shall be given him.' },
+    { ref: 'Proverbs 27:17', text: 'Iron sharpeneth iron; so a man sharpeneth the countenance of his friend.' },
+    { ref: 'Psalm 119:105', text: 'Thy word is a lamp unto my feet, and a light unto my path.' },
+    { ref: '2 Corinthians 4:16-18', text: 'For which cause we faint not; but though our outward man perish, yet the inward man is renewed day by day. For our light affliction, which is but for a moment, worketh for us a far more exceeding and eternal weight of glory; while we look not at the things which are seen, but at the things which are not seen: for the things which are seen are temporal; but the things which are not seen are eternal.' },
+    { ref: 'Matthew 6:14-15', text: 'For if ye forgive men their trespasses, your heavenly Father will also forgive you: but if ye forgive not men their trespasses, neither will your Father forgive your trespasses.' },
+    { ref: 'Colossians 3:13', text: 'Forbearing one another, and forgiving one another, if any man have a quarrel against any: even as Christ forgave you, so also do ye.' },
+    { ref: 'Mark 11:25', text: 'And when ye stand praying, forgive, if ye have ought against any: that your Father also which is in heaven may forgive you your trespasses.' },
+    { ref: 'Luke 6:37', text: 'Judge not, and ye shall not be judged: condemn not, and ye shall not be condemned: forgive, and ye shall be forgiven.' },
+    { ref: 'Psalm 103:12', text: 'As far as the east is from the west, so far hath he removed our transgressions from us.' },
+    { ref: 'John 15:11', text: 'These things have I spoken unto you, that my joy might remain in you, and that your joy might be full.' },
+    { ref: 'Philippians 4:4', text: 'Rejoice in the Lord alway: and again I say, Rejoice.' },
+    { ref: 'Revelation 1:8', text: 'I am Alpha and Omega, the beginning and the ending, saith the Lord, which is, and which was, and which is to come, the Almighty.' },
+    { ref: 'Revelation 21:5', text: 'And he that sat upon the throne said, Behold, I make all things new. And he said unto me, Write: for these words are true and faithful.' },
+    { ref: 'Revelation 22:13', text: 'I am Alpha and Omega, the beginning and the end, the first and the last.' },
+    { ref: 'Revelation 3:11', text: 'Behold, I come quickly: hold that fast which thou hast, that no man take thy crown.' },
+    { ref: 'Revelation 12:11', text: 'And they overcame him by the blood of the Lamb, and by the word of their testimony; and they loved not their lives unto the death.' },
+    { ref: 'Psalm 119:11', text: 'Thy word have I hid in mine heart, that I might not sin against thee.' },
+    { ref: 'Isaiah 9:6', text: 'For unto us a child is born, unto us a son is given: and the government shall be upon his shoulder: and his name shall be called Wonderful, Counsellor, The mighty God, The everlasting Father, The Prince of Peace.' },
+    { ref: 'Isaiah 43:18-19', text: 'Remember ye not the former things, neither consider the things of old. Behold, I will do a new thing; now it shall spring forth; shall ye not know it? I will even make a way in the wilderness, and rivers in the desert.' },
+    { ref: 'Isaiah 54:17', text: 'No weapon that is formed against thee shall prosper; and every tongue that shall rise against thee in judgment thou shalt condemn. This is the heritage of the servants of the LORD, and their righteousness is of me, saith the LORD.' },
+    { ref: 'Jeremiah 33:3', text: 'Call unto me, and I will answer thee, and shew thee great and mighty things, which thou knowest not.' },
+    { ref: 'Zechariah 4:6', text: 'This is the word of the LORD unto Zerubbabel, saying, Not by might, nor by power, but by my spirit, saith the LORD of hosts.' },
+    { ref: 'Matthew 6:26', text: 'Behold the fowls of the air: for they sow not, neither do they reap, nor gather into barns; yet your heavenly Father feedeth them. Are ye not much better than they?' },
+    { ref: 'Matthew 28:6', text: 'He is not here: for he is risen, as he said. Come, see the place where the Lord lay.' },
+    { ref: 'John 11:25-26', text: 'Jesus said unto her, I am the resurrection, and the life: he that believeth in me, though he were dead, yet shall he live: and whosoever liveth and believeth in me shall never die. Believest thou this?' },
+    { ref: 'Romans 8:1', text: 'There is therefore now no condemnation to them which are in Christ Jesus, who walk not after the flesh, but after the Spirit.' },
+    { ref: 'Romans 8:38-39', text: 'For I am persuaded, that neither death, nor life, nor angels, nor principalities, nor powers, nor things present, nor things to come, nor height, nor depth, nor any other creature, shall be able to separate us from the love of God, which is in Christ Jesus our Lord.' },
+    { ref: '1 Corinthians 15:57', text: 'But thanks be to God, which giveth us the victory through our Lord Jesus Christ.' },
+    { ref: '2 Corinthians 5:7', text: 'For we walk by faith, not by sight.' },
+    { ref: 'Ephesians 2:10', text: 'For we are his workmanship, created in Christ Jesus unto good works, which God hath before ordained that we should walk in them.' },
+    { ref: 'Hebrews 13:8', text: 'Jesus Christ the same yesterday, and to day, and for ever.' },
+    { ref: 'Revelation 3:20', text: 'Behold, I stand at the door, and knock: if any man hear my voice, and open the door, I will come in to him, and will sup with him, and he with me.' },
+    { ref: 'Revelation 21:4', text: 'And God shall wipe away all tears from their eyes; and there shall be no more death, neither sorrow, nor crying, neither shall there be any more pain: for the former things are passed away.' },
+    { ref: '1 John 1:9', text: 'If we confess our sins, he is faithful and just to forgive us our sins, and to cleanse us from all unrighteousness.' },
+    { ref: 'Nehemiah 8:10', text: 'Then he said unto them, Go your way, eat the fat, and drink the sweet, and send portions unto them for whom nothing is prepared: for this day is holy unto our Lord: neither be ye sorry; for the joy of the LORD is your strength.' }
   ];
+
+  var REFLECT_PROMPTS = [
+    'What does this verse mean for you today?',
+    'Where in your life do you need this truth right now?',
+    'Write this verse in your own words.',
+    'What is God asking you to let go of today?',
+    'How can you carry this into the rest of your day?',
+    'What are you grateful for this morning?'
+  ];
+
+  var READING_PLANS = {
+    peace: { name: 'Peace', verses: ['Philippians 4:6-7','Isaiah 26:3','John 14:27','Psalm 4:8','Psalm 91:1-2','Matthew 11:28','Psalm 46:10'] },
+    faith: { name: 'Faith', verses: ['Hebrews 11:1','Mark 11:24','Mark 9:23','Romans 10:9-10','2 Corinthians 5:17','James 1:2-4','Luke 1:37'] },
+    strength: { name: 'Strength', verses: ['Isaiah 41:10','Philippians 4:13','Joshua 1:9','Isaiah 40:31','2 Timothy 1:7','Psalm 27:1','Habakkuk 3:19'] },
+    love: { name: 'Love', verses: ['1 Corinthians 13:4-7','John 3:16','Romans 5:8','Ephesians 4:32','1 John 4:7-8','1 John 4:18','John 15:13'] },
+    hope: { name: 'Hope', verses: ['Jeremiah 29:11','Romans 15:13','Psalm 42:1','Lamentations 3:22-23','Romans 8:28','Hebrews 11:1','Isaiah 40:31'] },
+    gratitude: { name: 'Gratitude', verses: ['Psalm 100:4-5','1 Thessalonians 5:16-18','Psalm 118:24','Colossians 3:23','Psalm 30:5','Philippians 4:6-7','James 1:2-4'] },
+    wisdom: { name: 'Wisdom', verses: ['Proverbs 3:5-6','Proverbs 16:3','James 1:5','Proverbs 18:10','Proverbs 27:17','Romans 12:2','Psalm 119:105'] },
+    comfort: { name: 'Comfort', verses: ['Psalm 23:1','Psalm 34:18','Matthew 11:28','2 Corinthians 4:16-18','Psalm 55:22','Isaiah 41:10','Psalm 73:26'] },
+    revelation: { name: 'Revelation', verses: ['Revelation 1:8','Revelation 3:11','Revelation 3:20','Revelation 12:11','Revelation 21:4','Revelation 21:5','Revelation 22:13'] },
+    forgiveness: { name: 'Forgiveness', verses: ['Matthew 6:14-15','Ephesians 4:32','Colossians 3:13','Mark 11:25','1 John 1:9','Luke 6:37','Psalm 103:12'] },
+    joy: { name: 'Joy', verses: ['Nehemiah 8:10','Psalm 16:11','Psalm 30:5','John 15:11','Romans 15:13','Philippians 4:4','James 1:2-4'] }
+  };
+
   function dayOfYear(d){ var start = new Date(d.getFullYear(),0,0); return Math.floor((d-start)/86400000); }
-  var todaysRef = VERSE_LIST[dayOfYear(new Date()) % VERSE_LIST.length];
-  var apiRef = todaysRef.toLowerCase().replace(/\s+/g,'+');
+  function todayKey(){
+    var d = new Date();
+    return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+  }
+  function startOfDay(d){ var x = new Date(d); x.setHours(0,0,0,0); return x; }
+  function escapeHTML(s){ return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+  var STORAGE_JOURNAL = 'pereselah_journal';
+  var STORAGE_FAVES = 'pereselah_favorites';
+  var STORAGE_PLAN = 'pereselah_plan';
+
+  function loadJournal(){ try{ return JSON.parse(localStorage.getItem(STORAGE_JOURNAL)) || {}; }catch(e){ return {}; } }
+  function saveJournal(j){ localStorage.setItem(STORAGE_JOURNAL, JSON.stringify(j)); }
+  function loadFaves(){ try{ return JSON.parse(localStorage.getItem(STORAGE_FAVES)) || []; }catch(e){ return []; } }
+  function saveFaves(f){ localStorage.setItem(STORAGE_FAVES, JSON.stringify(f)); }
+  function loadPlanState(){ try{ return JSON.parse(localStorage.getItem(STORAGE_PLAN)) || { id: 'random' }; }catch(e){ return { id: 'random' }; } }
+  function savePlanState(p){ localStorage.setItem(STORAGE_PLAN, JSON.stringify(p)); }
+
+  var journal = loadJournal();
+  var faves = loadFaves();
+  var key = todayKey();
+  var planState = loadPlanState();
+
+  function computeTodaysRef(){
+    if(!planState || planState.id === 'random'){
+      return VERSE_LIST[dayOfYear(new Date()) % VERSE_LIST.length];
+    }
+    var plan = READING_PLANS[planState.id];
+    if(!plan) return VERSE_LIST[dayOfYear(new Date()) % VERSE_LIST.length];
+    var start = new Date(planState.startDate);
+    var daysSince = Math.floor((startOfDay(new Date()) - startOfDay(start)) / 86400000);
+    var dayIndex = ((daysSince % plan.verses.length) + plan.verses.length) % plan.verses.length;
+    return plan.verses[dayIndex];
+  }
+  function updatePlanDayLabel(){
+    var label = document.getElementById('planDayLabel');
+    if(!planState || planState.id === 'random'){ label.textContent = ''; return; }
+    var plan = READING_PLANS[planState.id];
+    var start = new Date(planState.startDate);
+    var daysSince = Math.floor((startOfDay(new Date()) - startOfDay(start)) / 86400000);
+    var dayIndex = ((daysSince % plan.verses.length) + plan.verses.length) % plan.verses.length;
+    label.textContent = plan.name + ' \u00b7 Day ' + (dayIndex + 1) + ' of ' + plan.verses.length;
+  }
+
+  var todaysRef = computeTodaysRef();
+  var promptIndex = dayOfYear(new Date()) % REFLECT_PROMPTS.length;
+
+  document.getElementById('reflectPrompt').textContent = REFLECT_PROMPTS[promptIndex];
+  document.getElementById('todayLabel').textContent = new Date().toLocaleDateString('en-US', { weekday:'short', month:'short', day:'numeric' });
+  updatePlanDayLabel();
+
+  var planSelect = document.getElementById('planSelect');
+  planSelect.value = planState.id || 'random';
+
+  planSelect.addEventListener('change', function(){
+    var planId = planSelect.value;
+    if(planState.id === planId) return;
+    planState = planId === 'random' ? { id: 'random' } : { id: planId, startDate: todayKey() };
+    savePlanState(planState);
+    todaysRef = computeTodaysRef();
+    updatePlanDayLabel();
+    delete journal[key];
+    loadVerse();
+  });
+
+  function computeStreak(){
+    var daySet = {};
+    Object.keys(journal).forEach(function(k){
+      if(journal[k].reflection && journal[k].reflection.trim()) daySet[k] = true;
+    });
+    var streak = 0;
+    var cursor = startOfDay(new Date());
+    while(true){
+      var k = cursor.getFullYear() + '-' + String(cursor.getMonth()+1).padStart(2,'0') + '-' + String(cursor.getDate()).padStart(2,'0');
+      if(daySet[k]){ streak++; cursor.setDate(cursor.getDate()-1); } else break;
+    }
+    return streak;
+  }
+  function renderStreak(){ document.getElementById('streakCount').textContent = computeStreak(); }
+  renderStreak();
+
   var verseLine = document.getElementById('verseLine');
   var verseRef = document.getElementById('verseRef');
-
-  function escapeHTML(s){ return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+  var currentVerseText = '';
 
   function writeVerse(text){
     var i = 0;
@@ -316,34 +534,338 @@
         verseLine.innerHTML = escapeHTML(text);
         verseRef.textContent = todaysRef;
         setTimeout(function(){ verseRef.classList.add('show'); }, 250);
+        updateSaveBtn();
       }
     }, 45);
   }
 
-  fetch('https://bible-api.com/' + apiRef)
-    .then(function(res){ return res.json(); })
-    .then(function(data){
-      var text = (data.text || '').trim().replace(/\n/g,' ');
-      if(!text) throw new Error('empty');
-      writeVerse(text);
-    })
-    .catch(function(){
-      var offlineVerse = OFFLINE_VERSES[dayOfYear(new Date()) % OFFLINE_VERSES.length];
-      todaysRef = offlineVerse.ref;
-      writeVerse(offlineVerse.text);
-    });
+  var basketBtn = document.getElementById('basketBtn');
+  var basketMenu = document.getElementById('basketMenu');
+  basketBtn.addEventListener('click', function(e){
+    e.stopPropagation();
+    basketMenu.classList.toggle('hidden');
+  });
+  document.addEventListener('click', function(e){
+    if(!basketMenu.classList.contains('hidden') && !e.target.closest('.basket-menu') && !e.target.closest('.basket-btn')){
+      basketMenu.classList.add('hidden');
+    }
+  });
+  basketMenu.addEventListener('click', function(e){
+    if(e.target.closest('button')){
+      setTimeout(function(){ basketMenu.classList.add('hidden'); }, 150);
+    }
+  });
 
-  var revealEls = document.querySelectorAll('.reveal');
-  if('IntersectionObserver' in window){
-    var io = new IntersectionObserver(function(entries){
-      entries.forEach(function(entry){
-        if(entry.isIntersecting){ entry.target.classList.add('in'); io.unobserve(entry.target); }
+  document.getElementById('replayBtn').addEventListener('click', function(){
+    if(!currentVerseText) return;
+    verseRef.classList.remove('show');
+    writeVerse(currentVerseText);
+  });
+
+  function loadVerse(){
+    if(journal[key] && journal[key].verseText){
+      currentVerseText = journal[key].verseText;
+      todaysRef = journal[key].verseRef || todaysRef;
+      verseLine.textContent = currentVerseText;
+      verseRef.textContent = todaysRef;
+      verseRef.classList.add('show');
+      updateSaveBtn();
+      return;
+    }
+    var apiRef = todaysRef.toLowerCase().replace(/\s+/g, '+');
+    fetch('https://bible-api.com/' + apiRef)
+      .then(function(res){ return res.json(); })
+      .then(function(data){
+        currentVerseText = (data.text || '').trim().replace(/\n/g,' ');
+        if(!currentVerseText) throw new Error('empty');
+        journal[key] = journal[key] || {};
+        journal[key].verseRef = todaysRef;
+        journal[key].verseText = currentVerseText;
+        saveJournal(journal);
+        writeVerse(currentVerseText);
+      })
+      .catch(function(){
+        // Offline or the API failed — first check if we have this EXACT verse's text
+        // built in (keeps reading plans on track even without internet). Only fall
+        // back to a random offline verse if the exact one truly isn't available.
+        var exactMatch = OFFLINE_VERSES.find(function(v){ return v.ref === todaysRef; });
+        var offlineVerse = exactMatch || OFFLINE_VERSES[dayOfYear(new Date()) % OFFLINE_VERSES.length];
+        todaysRef = offlineVerse.ref;
+        currentVerseText = offlineVerse.text;
+        journal[key] = journal[key] || {};
+        journal[key].verseRef = todaysRef;
+        journal[key].verseText = currentVerseText;
+        saveJournal(journal);
+        writeVerse(currentVerseText);
       });
-    }, { threshold: 0.15 });
-    revealEls.forEach(function(el){ io.observe(el); });
-  } else {
-    revealEls.forEach(function(el){ el.classList.add('in'); });
   }
+  loadVerse();
+
+  var saveVerseBtn = document.getElementById('saveVerseBtn');
+  function updateSaveBtn(){
+    var isSaved = faves.some(function(f){ return f.ref === todaysRef; });
+    saveVerseBtn.classList.toggle('saved', isSaved);
+    saveVerseBtn.textContent = isSaved ? '♥ Saved' : '♡ Save';
+  }
+  saveVerseBtn.addEventListener('click', function(){
+    if(!currentVerseText) return;
+    var idx = faves.findIndex(function(f){ return f.ref === todaysRef; });
+    if(idx === -1){ faves.unshift({ ref: todaysRef, text: currentVerseText, savedAt: new Date().toISOString() }); }
+    else { faves.splice(idx, 1); }
+    saveFaves(faves);
+    updateSaveBtn();
+    renderFavorites();
+  });
+
+  document.getElementById('shareVerseBtn').addEventListener('click', function(){
+    if(!currentVerseText) return;
+    var text = '\u201c' + currentVerseText + '\u201d \u2014 ' + todaysRef;
+    if(navigator.clipboard){
+      navigator.clipboard.writeText(text);
+      var btn = document.getElementById('shareVerseBtn');
+      var original = btn.textContent;
+      btn.textContent = 'Copied!';
+      setTimeout(function(){ btn.textContent = original; }, 1500);
+    }
+  });
+
+  function roundRectPath(ctx, x, y, w, h, r){
+    ctx.beginPath();
+    ctx.moveTo(x+r, y);
+    ctx.arcTo(x+w, y, x+w, y+h, r);
+    ctx.arcTo(x+w, y+h, x, y+h, r);
+    ctx.arcTo(x, y+h, x, y, r);
+    ctx.arcTo(x, y, x+w, y, r);
+    ctx.closePath();
+  }
+
+  function wrapCanvasText(ctx, text, cx, cy, maxWidth, lineHeight){
+    var words = text.split(' ');
+    var line = '';
+    var lines = [];
+    for(var n=0; n<words.length; n++){
+      var testLine = line + words[n] + ' ';
+      if(ctx.measureText(testLine).width > maxWidth && n > 0){
+        lines.push(line.trim());
+        line = words[n] + ' ';
+      } else {
+        line = testLine;
+      }
+    }
+    lines.push(line.trim());
+    var startY = cy - ((lines.length - 1) * lineHeight) / 2;
+    lines.forEach(function(l, i){ ctx.fillText(l, cx, startY + i * lineHeight); });
+  }
+
+  function downloadVerseCard(){
+    if(!currentVerseText) return;
+    var W = 800, H = 1000;
+    var canvas = document.createElement('canvas');
+    canvas.width = W; canvas.height = H;
+    var ctx = canvas.getContext('2d');
+
+    ctx.fillStyle = '#DCCFA8';
+    ctx.fillRect(0, 0, W, H);
+
+    var padX = 70, padY = 150, panelW = W - padX*2, panelH = H - padY*2;
+    var panelGrad = ctx.createLinearGradient(0, padY, 0, padY + panelH);
+    panelGrad.addColorStop(0, '#F1E4C0');
+    panelGrad.addColorStop(0.5, '#E9D9AC');
+    panelGrad.addColorStop(1, '#EFE0B8');
+    ctx.fillStyle = panelGrad;
+    ctx.fillRect(padX, padY, panelW, panelH);
+
+    function drawRod(y){
+      var rodGrad = ctx.createLinearGradient(0, y, 0, y + 34);
+      rodGrad.addColorStop(0, '#8A5A2E');
+      rodGrad.addColorStop(0.3, '#6B4423');
+      rodGrad.addColorStop(0.6, '#4A2E15');
+      rodGrad.addColorStop(1, '#8A5A2E');
+      ctx.fillStyle = rodGrad;
+      roundRectPath(ctx, padX - 16, y, panelW + 32, 34, 17);
+      ctx.fill();
+      ctx.fillStyle = '#5C3A1C';
+      ctx.beginPath(); ctx.ellipse(padX - 26, y + 17, 20, 26, 0, 0, Math.PI*2); ctx.fill();
+      ctx.beginPath(); ctx.ellipse(padX + panelW + 26, y + 17, 20, 26, 0, 0, Math.PI*2); ctx.fill();
+    }
+    drawRod(padY - 24);
+    drawRod(padY + panelH - 10);
+
+    ctx.textAlign = 'center';
+    ctx.fillStyle = '#6B4E20';
+    ctx.font = '600 20px Georgia, serif';
+    ctx.fillText('P E R E S E L A H', W/2, padY + 46);
+
+    ctx.fillStyle = '#3E2A10';
+    ctx.font = 'italic 32px Georgia, serif';
+    wrapCanvasText(ctx, '\u201c' + currentVerseText + '\u201d', W/2, padY + panelH/2 - 20, panelW - 90, 44);
+
+    ctx.font = 'italic 20px Georgia, serif';
+    ctx.fillStyle = '#8A6E3A';
+    ctx.fillText(todaysRef, W/2, padY + panelH - 46);
+
+    var link = document.createElement('a');
+    link.download = 'pereselah-' + todaysRef.replace(/[^a-z0-9]/gi, '-').toLowerCase() + '.png';
+    link.href = canvas.toDataURL('image/png');
+    link.click();
+  }
+
+  document.getElementById('downloadVerseBtn').addEventListener('click', downloadVerseCard);
+
+  // ---- Listen (text-to-speech) ----
+  var listenBtn = document.getElementById('listenBtn');
+  listenBtn.addEventListener('click', function(){
+    if(!currentVerseText) return;
+    if(!('speechSynthesis' in window)){
+      alert('Your browser doesn\u2019t support reading text aloud.');
+      return;
+    }
+    if(window.speechSynthesis.speaking){
+      window.speechSynthesis.cancel();
+      listenBtn.classList.remove('speaking');
+      listenBtn.textContent = '🔊 Listen';
+      return;
+    }
+    var utter = new SpeechSynthesisUtterance(currentVerseText);
+    utter.rate = 0.9;
+    utter.onend = function(){
+      listenBtn.classList.remove('speaking');
+      listenBtn.textContent = '🔊 Listen';
+    };
+    window.speechSynthesis.speak(utter);
+    listenBtn.classList.add('speaking');
+    listenBtn.textContent = '⏸ Stop';
+  });
+
+  // ---- Share (native share sheet, falls back to WhatsApp web link) ----
+  document.getElementById('shareWaBtn').addEventListener('click', function(){
+    if(!currentVerseText) return;
+    var text = '\u201c' + currentVerseText + '\u201d \u2014 ' + todaysRef + '\n\nvia Pereselah';
+    if(navigator.share){
+      navigator.share({ title: 'Pereselah', text: text }).catch(function(){});
+    } else {
+      window.open('https://wa.me/?text=' + encodeURIComponent(text), '_blank');
+    }
+  });
+
+  // ---- Daily reminder (browser notification, works while the app/tab is open) ----
+  var reminderToggle = document.getElementById('reminderToggle');
+  var reminderTimeInput = document.getElementById('reminderTime');
+  var STORAGE_REMINDER_ON = 'pereselah_reminder_on';
+  var STORAGE_REMINDER_TIME = 'pereselah_reminder_time';
+  var STORAGE_REMINDER_LAST = 'pereselah_reminder_last_fired';
+
+  var savedTime = localStorage.getItem(STORAGE_REMINDER_TIME);
+  if(savedTime) reminderTimeInput.value = savedTime;
+
+  function updateReminderBtn(){
+    var on = localStorage.getItem(STORAGE_REMINDER_ON) === 'on' && 'Notification' in window && Notification.permission === 'granted';
+    reminderToggle.classList.toggle('on', on);
+    reminderToggle.textContent = on ? '🔔 Reminder on' : '🔔 Daily reminder';
+  }
+  updateReminderBtn();
+
+  reminderToggle.addEventListener('click', async function(){
+    if(!('Notification' in window)){
+      alert('This browser does not support notifications.');
+      return;
+    }
+    if(localStorage.getItem(STORAGE_REMINDER_ON) === 'on'){
+      localStorage.setItem(STORAGE_REMINDER_ON, 'off');
+      updateReminderBtn();
+      return;
+    }
+    var perm = await Notification.requestPermission();
+    if(perm === 'granted'){
+      localStorage.setItem(STORAGE_REMINDER_ON, 'on');
+      new Notification('Pereselah', { body: 'Reminders are on \u2014 we\u2019ll nudge you at ' + reminderTimeInput.value + ' each day.' });
+    }
+    updateReminderBtn();
+  });
+
+  reminderTimeInput.addEventListener('change', function(){
+    localStorage.setItem(STORAGE_REMINDER_TIME, reminderTimeInput.value);
+  });
+
+  setInterval(function(){
+    if(localStorage.getItem(STORAGE_REMINDER_ON) !== 'on') return;
+    if(!('Notification' in window) || Notification.permission !== 'granted') return;
+    var now = new Date();
+    var nowHM = String(now.getHours()).padStart(2,'0') + ':' + String(now.getMinutes()).padStart(2,'0');
+    var target = localStorage.getItem(STORAGE_REMINDER_TIME) || '07:00';
+    var lastFired = localStorage.getItem(STORAGE_REMINDER_LAST);
+    if(nowHM === target && lastFired !== todayKey()){
+      new Notification('Pereselah', { body: '\ud83d\ude4f Time for your Selah \u2014 today\u2019s verse is waiting.' });
+      localStorage.setItem(STORAGE_REMINDER_LAST, todayKey());
+    }
+  }, 60000);
+
+  var reflectionInput = document.getElementById('reflectionInput');
+  if(journal[key] && journal[key].reflection){ reflectionInput.value = journal[key].reflection; }
+
+  document.getElementById('saveReflectionBtn').addEventListener('click', function(){
+    journal[key] = journal[key] || {};
+    journal[key].reflection = reflectionInput.value;
+    journal[key].verseRef = todaysRef;
+    journal[key].verseText = currentVerseText;
+    journal[key].date = key;
+    saveJournal(journal);
+    renderStreak();
+    renderHistory();
+    var note = document.getElementById('savedNote');
+    note.classList.add('show');
+    setTimeout(function(){ note.classList.remove('show'); }, 2000);
+  });
+
+  function renderHistory(){
+    var panel = document.getElementById('historyPanel');
+    var entries = Object.keys(journal)
+      .filter(function(k){ return journal[k].reflection && journal[k].reflection.trim(); })
+      .sort().reverse();
+    if(entries.length === 0){
+      panel.innerHTML = '<div class="hist-empty"><span class="caveat">Nothing written yet.</span>Your reflections will appear here once you save one.</div>';
+      return;
+    }
+    var html = '';
+    entries.forEach(function(k){
+      var e = journal[k];
+      html += '<div class="hist-item">' +
+        '<div class="hist-date">' + k + '</div>' +
+        '<div class="hist-verse-ref">' + escapeHTML(e.verseRef || '') + '</div>' +
+        '<div class="hist-verse-text">\u201c' + escapeHTML(e.verseText || '') + '\u201d</div>' +
+        '<div class="hist-reflection">' + escapeHTML(e.reflection) + '</div>' +
+      '</div>';
+    });
+    panel.innerHTML = html;
+  }
+  renderHistory();
+
+  function renderFavorites(){
+    var panel = document.getElementById('favoritesPanel');
+    if(faves.length === 0){
+      panel.innerHTML = '<div class="hist-empty"><span class="caveat">No saved verses yet.</span>Tap \u2661 Save on a verse to keep it here.</div>';
+      return;
+    }
+    var html = '';
+    faves.forEach(function(f){
+      html += '<div class="fav-item"><div class="fav-ref">' + escapeHTML(f.ref) + '</div><div class="fav-text">\u201c' + escapeHTML(f.text) + '\u201d</div></div>';
+    });
+    panel.innerHTML = html;
+  }
+  renderFavorites();
+
+  var tabBtns = document.querySelectorAll('.tab-btn');
+  var historyPanel = document.getElementById('historyPanel');
+  var favoritesPanel = document.getElementById('favoritesPanel');
+  tabBtns.forEach(function(btn){
+    btn.addEventListener('click', function(){
+      tabBtns.forEach(function(b){ b.classList.remove('active'); });
+      btn.classList.add('active');
+      var tab = btn.getAttribute('data-tab');
+      historyPanel.style.display = tab === 'history' ? 'block' : 'none';
+      favoritesPanel.style.display = tab === 'favorites' ? 'block' : 'none';
+    });
+  });
 })();
 </script>
 
