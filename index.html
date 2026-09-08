@@ -22,7 +22,7 @@
   }
   .cinzel{ font-family:'Cinzel',serif; }
   .caveat{ font-family:'Caveat',cursive; }
-  .wrap{ max-width: 560px; margin: 0 auto; padding: 0 20px; }
+  .wrap{ max-width: 760px; margin: 0 auto; padding: 0 20px; }
 
   header{ padding: 34px 20px 6px; text-align:center; }
   .wordmark{ font-family:'Cinzel',serif; font-size: 17px; letter-spacing: 3px; color:#6B4E20; font-weight:600; }
@@ -70,7 +70,7 @@
   .rod::before{ left: -12px; }
   .rod::after{ right: -12px; }
   .parchment{
-    position: relative; margin: -2px 6px 0; padding: 34px 30px 28px;
+    position: relative; margin: -2px 6px 0; padding: 40px 48px 34px;
     background: linear-gradient(135deg, #F1E4C0 0%, #E9D9AC 50%, #EFE0B8 100%);
     box-shadow:
       inset 0 12px 20px -12px rgba(60,40,10,0.35), inset 0 -12px 20px -12px rgba(60,40,10,0.35),
@@ -79,7 +79,7 @@
     text-align:center; z-index:1;
   }
   .verse-box{ min-height: 92px; display:flex; align-items:center; justify-content:center; }
-  .verse-line{ font-family:'Caveat',cursive; font-size: 24px; color:#3E2A10; line-height:1.5; max-width: 380px; }
+  .verse-line{ font-family:'Caveat',cursive; font-size: 26px; color:#3E2A10; line-height:1.55; max-width: 560px; }
   .quill{ display:inline-block; margin-left:2px; animation: quillbob 0.5s ease-in-out infinite alternate; transform-origin: bottom left; }
   @keyframes quillbob{ from{ transform: rotate(-6deg) translateY(0); } to{ transform: rotate(4deg) translateY(-2px); } }
   .verse-ref{ margin-top:14px; font-style: italic; font-size: 13px; color:#8A6E3A; opacity:0; transition: opacity 0.6s ease; }
@@ -136,6 +136,27 @@
   }
   .tab-btn.active{ background:#3E2A10; color:#F1E4C0; border-color:#3E2A10; }
 
+  .journal-links{ display:flex; gap:10px; justify-content:center; margin: 22px 6px 30px; }
+  .journal-link-btn{
+    flex:1; background: linear-gradient(135deg,#F1E4C0,#E9D9AC); border:1px solid #B89858; color:#3E2A10;
+    font-size:13.5px; padding:12px; border-radius:8px; cursor:pointer; font-family:'EB Garamond',serif;
+    box-shadow: 0 8px 18px -12px rgba(40,25,10,0.3);
+  }
+  .journal-link-btn:hover{ background: linear-gradient(135deg,#E9D9AC,#F1E4C0); }
+
+  .journal-overlay{
+    position:fixed; inset:0; background:#DCCFA8; z-index:80; overflow-y:auto;
+  }
+  .journal-overlay-header{
+    display:flex; align-items:center; gap:14px; padding: 20px 20px 10px; position:sticky; top:0;
+    background:#DCCFA8; z-index:2;
+  }
+  .back-btn{
+    background: rgba(255,250,235,0.7); border:1px solid #B89858; color:#3E2A10; font-size:13px;
+    padding:8px 16px; border-radius:20px; cursor:pointer; font-family:'EB Garamond',serif;
+  }
+  .journal-overlay-title{ font-family:'Cinzel',serif; font-size:14px; letter-spacing:2px; color:#6B4E20; }
+
   .history{ padding: 18px 6px 90px; }
   .hist-empty{ text-align:center; color:#8A6E3A; padding: 36px 18px; font-size:14px; }
   .hist-empty .caveat{ font-size: 19px; color: #3E2A10; margin-bottom:6px; display:block; }
@@ -156,6 +177,11 @@
   .fav-text{ font-family:'Caveat',cursive; font-size: 17px; }
 
   footer{ text-align:center; padding: 20px 20px 40px; color: #8A6E3A; font-size: 11px; letter-spacing: 1px; }
+
+  @media (max-width: 480px){
+    .parchment{ padding: 32px 24px 26px; }
+    .verse-line{ font-size: 21px; }
+  }
 </style>
 </head>
 <body>
@@ -230,13 +256,25 @@
     </div>
   </div>
 
-  <div class="tabs">
-    <button class="tab-btn active" data-tab="history">Journal</button>
-    <button class="tab-btn" data-tab="favorites">Saved verses</button>
+  <div class="journal-links">
+    <button class="journal-link-btn" id="openJournalBtn">📖 Journal</button>
+    <button class="journal-link-btn" id="openFavesBtn">♡ Saved verses</button>
   </div>
+</div>
 
-  <div class="history" id="historyPanel"></div>
-  <div class="history" id="favoritesPanel" style="display:none;"></div>
+<div class="journal-overlay hidden" id="journalOverlay">
+  <div class="journal-overlay-header">
+    <button class="back-btn" id="journalBackBtn">← Back</button>
+    <div class="journal-overlay-title">PERESELAH</div>
+  </div>
+  <div class="wrap">
+    <div class="tabs">
+      <button class="tab-btn active" data-tab="history">Journal</button>
+      <button class="tab-btn" data-tab="favorites">Saved verses</button>
+    </div>
+    <div class="history" id="historyPanel"></div>
+    <div class="history" id="favoritesPanel" style="display:none;"></div>
+  </div>
 </div>
 
 <footer>
@@ -815,6 +853,7 @@
     var note = document.getElementById('savedNote');
     note.classList.add('show');
     setTimeout(function(){ note.classList.remove('show'); }, 2000);
+    checkCelebrations(computeStreak());
   });
 
   function renderHistory(){
@@ -866,6 +905,73 @@
       favoritesPanel.style.display = tab === 'favorites' ? 'block' : 'none';
     });
   });
+
+  var journalOverlay = document.getElementById('journalOverlay');
+  function openJournalOverlay(tab){
+    journalOverlay.classList.remove('hidden');
+    tabBtns.forEach(function(b){ b.classList.toggle('active', b.getAttribute('data-tab') === tab); });
+    historyPanel.style.display = tab === 'history' ? 'block' : 'none';
+    favoritesPanel.style.display = tab === 'favorites' ? 'block' : 'none';
+    window.scrollTo(0, 0);
+  }
+  document.getElementById('openJournalBtn').addEventListener('click', function(){ openJournalOverlay('history'); });
+  document.getElementById('openFavesBtn').addEventListener('click', function(){ openJournalOverlay('favorites'); });
+  document.getElementById('journalBackBtn').addEventListener('click', function(){
+    journalOverlay.classList.add('hidden');
+  });
+
+  // ---- Celebration confetti ----
+  function celebrate(){
+    var pieces = ['🎉','🎊','✨','🙌'];
+    for(var i = 0; i < 44; i++){
+      (function(){
+        var el = document.createElement('div');
+        el.textContent = pieces[Math.floor(Math.random() * pieces.length)];
+        el.style.position = 'fixed';
+        el.style.left = (Math.random() * 100) + 'vw';
+        el.style.top = '-30px';
+        el.style.fontSize = (14 + Math.random() * 16) + 'px';
+        el.style.zIndex = '999';
+        el.style.pointerEvents = 'none';
+        el.style.transition = 'transform 2.3s ease-in, opacity 2.3s ease-in';
+        document.body.appendChild(el);
+        requestAnimationFrame(function(){
+          el.style.transform = 'translateY(' + (100 + Math.random() * 20) + 'vh) rotate(' + (Math.random() * 360) + 'deg)';
+          el.style.opacity = '0';
+        });
+        setTimeout(function(){ el.remove(); }, 2500);
+      })();
+    }
+  }
+
+  function checkCelebrations(newStreak){
+    var celebrated = false;
+
+    if(planState && planState.id !== 'random'){
+      var plan = READING_PLANS[planState.id];
+      if(plan){
+        var daysSince = Math.floor((startOfDay(new Date()) - startOfDay(new Date(planState.startDate))) / 86400000);
+        var dayIndex = ((daysSince % plan.verses.length) + plan.verses.length) % plan.verses.length;
+        if(dayIndex === plan.verses.length - 1){
+          var completedKey = 'pereselah_completed_' + planState.id + '_' + planState.startDate;
+          if(!localStorage.getItem(completedKey)){
+            localStorage.setItem(completedKey, 'yes');
+            celebrated = true;
+          }
+        }
+      }
+    }
+
+    if(newStreak > 0 && newStreak % 7 === 0){
+      var lastCelebrated = parseInt(localStorage.getItem('pereselah_last_streak_celebrated') || '0', 10);
+      if(newStreak > lastCelebrated){
+        localStorage.setItem('pereselah_last_streak_celebrated', String(newStreak));
+        celebrated = true;
+      }
+    }
+
+    if(celebrated) celebrate();
+  }
 })();
 </script>
 
