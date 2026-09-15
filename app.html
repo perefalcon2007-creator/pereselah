@@ -10,8 +10,10 @@
 <link rel="apple-touch-icon" href="icon-192.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;600;700&family=Cinzel:wght@500;600&family=EB+Garamond:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
   *{ margin:0; padding:0; box-sizing:border-box; }
+  .hidden{ display:none !important; }
   body{
     background:
       radial-gradient(ellipse at 20% 15%, rgba(140,110,60,0.08) 0%, transparent 45%),
@@ -21,13 +23,34 @@
   }
   .cinzel{ font-family:'Cinzel',serif; }
   .caveat{ font-family:'Caveat',cursive; }
-  .wrap{ max-width: 560px; margin: 0 auto; padding: 0 20px; }
+  .wrap{ max-width: 760px; margin: 0 auto; padding: 0 20px; }
 
   header{ padding: 34px 20px 6px; text-align:center; }
   .wordmark{ font-family:'Cinzel',serif; font-size: 17px; letter-spacing: 3px; color:#6B4E20; font-weight:600; }
   .tagline{ font-size: 13px; color: #8A6E3A; font-style: italic; margin-top: 4px; }
 
   .streak-row{ display:flex; justify-content:center; gap:10px; padding: 18px 20px 0; align-items:center; }
+  .controls-row{ display:flex; align-items:flex-start; justify-content:center; gap:18px; padding: 16px 20px 0; }
+  .tools-col{ display:flex; flex-direction:column; align-items:center; position:relative; }
+  .tools-label, .plan-choose-label{ font-size:10.5px; color:#8A6E3A; margin-top:6px; letter-spacing:0.4px; }
+  .plan-col{ display:flex; flex-direction:column; align-items:center; }
+  .plan-select{
+    background: rgba(255,250,235,0.6); border:1px solid #B89858; color:#3E2A10; font-size:13px;
+    padding: 8px 16px; border-radius: 20px; font-family:'EB Garamond',serif; cursor:pointer;
+  }
+  .plan-day-label{ text-align:center; font-size:11.5px; color:#8A6E3A; margin-top:8px; font-style:italic; }
+  .reminder-row{
+    display:flex; justify-content:center; align-items:center; gap:10px; padding: 14px 20px 0;
+  }
+  .reminder-toggle{
+    background:none; border:1px solid #B89858; color:#6B4E20; font-size:12px; padding:6px 14px;
+    border-radius:20px; cursor:pointer; font-family:'EB Garamond',serif;
+  }
+  .reminder-toggle.on{ background: rgba(198,154,72,0.25); }
+  .reminder-time{
+    border:1px solid #B89858; border-radius: 20px; padding:5px 10px; font-family:'EB Garamond',serif;
+    font-size:12px; color:#3E2A10; background: rgba(255,250,235,0.6);
+  }
   .streak-badge{
     display:flex; align-items:center; gap:6px; border: 1px solid #B89858; color:#6B4E20;
     padding: 5px 14px; border-radius: 20px; font-size: 12.5px;
@@ -48,7 +71,7 @@
   .rod::before{ left: -12px; }
   .rod::after{ right: -12px; }
   .parchment{
-    position: relative; margin: -2px 6px 0; padding: 34px 30px 28px;
+    position: relative; margin: -2px 6px 0; padding: 40px 48px 34px;
     background: linear-gradient(135deg, #F1E4C0 0%, #E9D9AC 50%, #EFE0B8 100%);
     box-shadow:
       inset 0 12px 20px -12px rgba(60,40,10,0.35), inset 0 -12px 20px -12px rgba(60,40,10,0.35),
@@ -57,7 +80,7 @@
     text-align:center; z-index:1;
   }
   .verse-box{ min-height: 92px; display:flex; align-items:center; justify-content:center; }
-  .verse-line{ font-family:'Caveat',cursive; font-size: 24px; color:#3E2A10; line-height:1.5; max-width: 380px; }
+  .verse-line{ font-family:'Caveat',cursive; font-size: 26px; color:#3E2A10; line-height:1.55; max-width: 560px; }
   .quill{ display:inline-block; margin-left:2px; animation: quillbob 0.5s ease-in-out infinite alternate; transform-origin: bottom left; }
   @keyframes quillbob{ from{ transform: rotate(-6deg) translateY(0); } to{ transform: rotate(4deg) translateY(-2px); } }
   .verse-ref{ margin-top:14px; font-style: italic; font-size: 13px; color:#8A6E3A; opacity:0; transition: opacity 0.6s ease; }
@@ -68,6 +91,23 @@
     border-radius: 20px; cursor:pointer; font-family:'EB Garamond',serif;
   }
   .verse-btn.saved{ background: rgba(198,154,72,0.2); }
+  .verse-btn.speaking{ background: rgba(198,154,72,0.3); }
+
+  .basket-btn{
+    background: rgba(255,250,235,0.85);
+    border:1px solid #B89858; width:38px; height:38px; border-radius:50%; font-size:17px;
+    cursor:pointer; display:flex; align-items:center; justify-content:center;
+  }
+  .basket-menu{
+    position:absolute; top:70px; left:0; z-index:6; background: linear-gradient(135deg,#F1E4C0,#E9D9AC);
+    border:1px solid #B89858; border-radius:10px; padding:6px; min-width:170px;
+    box-shadow: 0 14px 30px -12px rgba(40,25,10,0.4);
+  }
+  .basket-menu button{
+    display:flex; align-items:center; gap:8px; width:100%; text-align:left; background:none; border:none;
+    color:#3E2A10; font-size:13.5px; padding:9px 10px; border-radius:6px; cursor:pointer; font-family:'EB Garamond',serif;
+  }
+  .basket-menu button:hover{ background: rgba(184,152,88,0.2); }
 
   .reflect-card{
     margin: 20px 6px 0; background: linear-gradient(135deg,#F1E4C0,#E9D9AC); border-radius: 6px;
@@ -97,6 +137,27 @@
   }
   .tab-btn.active{ background:#3E2A10; color:#F1E4C0; border-color:#3E2A10; }
 
+  .journal-links{ display:flex; gap:10px; justify-content:center; margin: 22px 6px 30px; }
+  .journal-link-btn{
+    flex:1; background: linear-gradient(135deg,#F1E4C0,#E9D9AC); border:1px solid #B89858; color:#3E2A10;
+    font-size:13.5px; padding:12px; border-radius:8px; cursor:pointer; font-family:'EB Garamond',serif;
+    box-shadow: 0 8px 18px -12px rgba(40,25,10,0.3);
+  }
+  .journal-link-btn:hover{ background: linear-gradient(135deg,#E9D9AC,#F1E4C0); }
+
+  .journal-overlay{
+    position:fixed; inset:0; background:#DCCFA8; z-index:80; overflow-y:auto;
+  }
+  .journal-overlay-header{
+    display:flex; align-items:center; gap:14px; padding: 20px 20px 10px; position:sticky; top:0;
+    background:#DCCFA8; z-index:2;
+  }
+  .back-btn{
+    background: rgba(255,250,235,0.7); border:1px solid #B89858; color:#3E2A10; font-size:13px;
+    padding:8px 16px; border-radius:20px; cursor:pointer; font-family:'EB Garamond',serif;
+  }
+  .journal-overlay-title{ font-family:'Cinzel',serif; font-size:14px; letter-spacing:2px; color:#6B4E20; }
+
   .history{ padding: 18px 6px 90px; }
   .hist-empty{ text-align:center; color:#8A6E3A; padding: 36px 18px; font-size:14px; }
   .hist-empty .caveat{ font-size: 19px; color: #3E2A10; margin-bottom:6px; display:block; }
@@ -117,18 +178,132 @@
   .fav-text{ font-family:'Caveat',cursive; font-size: 17px; }
 
   footer{ text-align:center; padding: 20px 20px 40px; color: #8A6E3A; font-size: 11px; letter-spacing: 1px; }
+
+  /* AUTH SCREEN */
+  .auth-shell{ max-width: 380px; margin: 60px auto; padding: 0 24px; }
+  .auth-card{ background: linear-gradient(135deg,#F1E4C0,#E9D9AC); border: 1px solid #B89858; border-radius: 12px; padding: 28px 26px; }
+  .auth-title{ font-size: 20px; font-weight: 600; margin-bottom: 6px; }
+  .auth-sub{ font-size: 13.5px; color: #6B5636; margin-bottom: 22px; }
+  .field-label{ font-size: 12.5px; color: #6B5636; margin-bottom: 6px; display:block; }
+  .field{
+    width: 100%; border: 1px solid #B89858; border-radius: 8px; padding: 10px 12px;
+    font-family: 'EB Garamond', serif; font-size: 14.5px; background: rgba(255,250,235,0.6); margin-bottom: 14px; outline: none; color:#3E2A10;
+  }
+  .field:focus{ border-color: #3E2A10; }
+  .auth-btn{
+    width: 100%; background: #3E2A10; color: #F1E4C0; border: none;
+    font-size: 14px; font-weight: 500; padding: 11px; border-radius: 8px; cursor: pointer;
+    font-family: 'EB Garamond', serif; margin-top: 4px;
+  }
+  .auth-btn:disabled{ opacity: 0.5; cursor: default; }
+  .auth-switch{ text-align:center; font-size: 13px; color: #6B5636; margin-top: 16px; }
+  .auth-switch button{ background:none; border:none; color: #3E2A10; font-weight: 600; cursor:pointer; font-family: 'EB Garamond', serif; font-size: 13px; padding: 0; text-decoration: underline; }
+  .auth-error{ background: #F9D8CC; color: #7A2E10; font-size: 12.5px; padding: 9px 12px; border-radius: 6px; margin-bottom: 14px; }
+  .auth-note{ background: #EEDEB8; color: #6B4E1A; font-size: 12.5px; padding: 9px 12px; border-radius: 6px; margin-bottom: 14px; }
+
+  /* PROFILE CORNER */
+  .profile-corner{ position:absolute; top:30px; left:20px; }
+  #avatarBtn{
+    width: 32px; height: 32px; border-radius: 50%; background: #3E2A10; color: #F1E4C0;
+    border: none; font-family: 'Cinzel', serif; font-size: 13px; font-weight: 600;
+    cursor:pointer; display:flex; align-items:center; justify-content:center;
+  }
+  .avatar-menu{
+    position:absolute; top: 40px; left: 0; background: linear-gradient(135deg,#F1E4C0,#E9D9AC); border: 1px solid #B89858;
+    border-radius: 10px; min-width: 190px; box-shadow: 0 12px 30px -10px rgba(40,25,10,0.3);
+    padding: 6px; z-index: 50;
+  }
+  .avatar-email{
+    font-size: 11.5px; color: #6B5636; padding: 8px 10px; border-bottom: 1px solid #C9AF75;
+    margin-bottom: 4px; word-break: break-all;
+  }
+  .avatar-menu button{
+    display:block; width:100%; text-align:left; background:none; border:none; color: #3E2A10;
+    font-size: 13px; padding: 8px 10px; border-radius: 6px; cursor:pointer; font-family: 'EB Garamond', serif;
+  }
+  .avatar-menu button:hover{ background: rgba(184,152,88,0.2); }
+
+  @media (max-width: 480px){
+    .parchment{ padding: 32px 24px 26px; }
+    .verse-line{ font-size: 21px; }
+  }
 </style>
 </head>
 <body>
 
-<header>
+<header style="position:relative;">
   <div class="wordmark">PERESELAH</div>
   <div class="tagline">Pause. Reflect. Return.</div>
+  <div class="profile-corner hidden" id="profileCorner">
+    <button id="avatarBtn"></button>
+    <div class="avatar-menu hidden" id="avatarMenu">
+      <div class="avatar-email" id="avatarEmail"></div>
+      <button id="signOutBtn">Sign out</button>
+    </div>
+  </div>
 </header>
+
+<div id="authScreen" class="auth-shell">
+  <div class="auth-card">
+    <div class="auth-title">Welcome back</div>
+    <div class="auth-sub" id="authSub">Sign in to see your journal.</div>
+    <div id="authError" class="auth-error hidden"></div>
+    <div id="authNote" class="auth-note hidden"></div>
+    <label class="field-label">Email</label>
+    <input id="authEmail" class="field" type="email" placeholder="you@example.com" autocomplete="email">
+    <label class="field-label">Password</label>
+    <input id="authPassword" class="field" type="password" placeholder="At least 6 characters" autocomplete="current-password">
+    <button id="authSubmit" class="auth-btn">Sign in</button>
+    <div class="auth-switch">
+      <span id="authSwitchText">Don't have an account?</span>
+      <button id="authSwitchBtn">Sign up</button>
+    </div>
+  </div>
+</div>
+
+<div id="appMain" class="hidden">
 
 <div class="streak-row">
   <span class="streak-badge">🔥 <span id="streakCount">0</span> day streak</span>
   <span class="date-label" id="todayLabel"></span>
+</div>
+
+<div class="controls-row">
+  <div class="tools-col">
+    <button class="basket-btn" id="basketBtn" aria-label="Verse actions" title="Verse actions">🧺</button>
+    <div class="tools-label">Tools</div>
+    <div class="basket-menu hidden" id="basketMenu">
+      <button id="replayBtn">✒ Rewrite</button>
+      <button id="saveVerseBtn">♡ Save</button>
+      <button id="shareVerseBtn">Copy text</button>
+      <button id="downloadVerseBtn">⬇ Download</button>
+      <button id="listenBtn">🔊 Listen</button>
+      <button id="shareWaBtn">↗ Share</button>
+    </div>
+  </div>
+  <div class="plan-col">
+    <select class="plan-select" id="planSelect">
+      <option value="random">Random verse</option>
+      <option value="peace">Peace (7 days)</option>
+      <option value="faith">Faith (7 days)</option>
+      <option value="strength">Strength (7 days)</option>
+      <option value="love">Love (7 days)</option>
+      <option value="hope">Hope (7 days)</option>
+      <option value="gratitude">Gratitude (7 days)</option>
+      <option value="wisdom">Wisdom (7 days)</option>
+      <option value="comfort">Comfort (7 days)</option>
+      <option value="revelation">Revelation (7 days)</option>
+      <option value="forgiveness">Forgiveness (7 days)</option>
+      <option value="joy">Joy (7 days)</option>
+    </select>
+    <div class="plan-choose-label">Choose your reading plan</div>
+  </div>
+</div>
+<div class="plan-day-label" id="planDayLabel"></div>
+
+<div class="reminder-row">
+  <button class="reminder-toggle" id="reminderToggle">🔔 Daily reminder</button>
+  <input type="time" class="reminder-time" id="reminderTime" value="07:00">
 </div>
 
 <div class="wrap">
@@ -139,11 +314,6 @@
         <div class="verse-line" id="verseLine"></div>
       </div>
       <div class="verse-ref" id="verseRef"></div>
-      <div class="verse-actions">
-        <button class="verse-btn" id="saveVerseBtn">♡ Save</button>
-        <button class="verse-btn" id="shareVerseBtn">Copy</button>
-        <button class="verse-btn" id="downloadVerseBtn">⬇ Download</button>
-      </div>
     </div>
     <div class="rod"></div>
   </div>
@@ -158,13 +328,27 @@
     </div>
   </div>
 
-  <div class="tabs">
-    <button class="tab-btn active" data-tab="history">Journal</button>
-    <button class="tab-btn" data-tab="favorites">Saved verses</button>
+  <div class="journal-links">
+    <button class="journal-link-btn" id="openJournalBtn">📖 Journal</button>
+    <button class="journal-link-btn" id="openFavesBtn">♡ Saved verses</button>
   </div>
+</div>
 
-  <div class="history" id="historyPanel"></div>
-  <div class="history" id="favoritesPanel" style="display:none;"></div>
+<div class="journal-overlay hidden" id="journalOverlay">
+  <div class="journal-overlay-header">
+    <button class="back-btn" id="journalBackBtn">← Back</button>
+    <div class="journal-overlay-title">PERESELAH</div>
+  </div>
+  <div class="wrap">
+    <div class="tabs">
+      <button class="tab-btn active" data-tab="history">Journal</button>
+      <button class="tab-btn" data-tab="favorites">Saved verses</button>
+    </div>
+    <div class="history" id="historyPanel"></div>
+    <div class="history" id="favoritesPanel" style="display:none;"></div>
+  </div>
+</div>
+
 </div>
 
 <footer>
@@ -200,6 +384,12 @@
 
 <script>
 (function(){
+  var SUPABASE_URL = 'https://zzbfmpmwlufqlyhbptem.supabase.co';
+  var SUPABASE_KEY = 'sb_publishable_hleC5HMf7_qtnw5MvYgPZw_E2eGRcbU';
+  var supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+  var currentUserId = null;
+  var currentUserEmail = null;
+
   // ONLINE pool — 120 references, text fetched live from the API when a connection is available
   var VERSE_LIST = [
     'John 3:16','Psalm 23:1','Proverbs 3:5-6','Philippians 4:13','Romans 8:28',
@@ -233,7 +423,18 @@
     'Colossians 3:2','1 Thessalonians 5:16-18','1 Timothy 4:12','2 Timothy 3:16-17','2 Timothy 4:7',
     'Hebrews 4:16','Hebrews 12:1-2','Hebrews 13:5-6','James 1:5','James 1:12',
     'James 4:7-8','1 Peter 1:3','1 Peter 2:9','1 Peter 3:15','1 Peter 4:8',
-    '1 John 1:9','1 John 4:7-8','1 John 4:18','1 John 5:14','Revelation 3:20','Revelation 21:4'
+    '1 John 1:9','1 John 4:7-8','1 John 4:18','1 John 5:14','Revelation 3:20','Revelation 21:4',
+    'Numbers 6:24-26','Deuteronomy 6:5','1 Samuel 17:47','2 Samuel 22:31','2 Chronicles 7:14',
+    'Nehemiah 4:14','Esther 4:14','Job 1:21','Job 42:2','Psalm 2:11',
+    'Psalm 33:11','Psalm 40:1-3','Psalm 61:2','Psalm 63:1','Psalm 68:19',
+    'Psalm 71:5','Psalm 77:11','Psalm 84:10','Psalm 89:1','Psalm 96:1',
+    'Psalm 105:4','Psalm 111:10','Psalm 116:1-2','Psalm 130:5','Psalm 133:1',
+    'Psalm 145:18','Proverbs 2:6','Proverbs 10:12','Proverbs 12:25','Proverbs 13:20',
+    'Proverbs 19:21','Proverbs 21:1','Proverbs 29:18','Isaiah 1:18','Isaiah 12:2',
+    'Isaiah 25:1','Isaiah 30:15','Isaiah 49:15-16','Isaiah 61:1','Jeremiah 1:5',
+    'Hosea 6:3','Revelation 1:8','Revelation 21:5','Revelation 22:13','Revelation 3:11',
+    'Revelation 12:11','Matthew 6:14-15','Colossians 3:13','Mark 11:25','Luke 6:37',
+    'Psalm 103:12','John 15:11','Philippians 4:4'
   ];
 
   // OFFLINE fallback — 40 verses with the actual KJV text built in, used when the API can't be reached
@@ -277,7 +478,58 @@
     { ref: 'Psalm 55:22', text: 'Cast thy burden upon the LORD, and he shall sustain thee: he shall never suffer the righteous to be moved.' },
     { ref: 'Ephesians 2:8-9', text: 'For by grace are ye saved through faith; and that not of yourselves: it is the gift of God: not of works, lest any man should boast.' },
     { ref: 'Psalm 73:26', text: 'My flesh and my heart faileth: but God is the strength of my heart, and my portion for ever.' },
-    { ref: 'Psalm 46:10', text: 'Be still, and know that I am God: I will be exalted among the heathen, I will be exalted in the earth.' }
+    { ref: 'Psalm 46:10', text: 'Be still, and know that I am God: I will be exalted among the heathen, I will be exalted in the earth.' },
+    { ref: 'Isaiah 26:3', text: 'Thou wilt keep him in perfect peace, whose mind is stayed on thee: because he trusteth in thee.' },
+    { ref: 'John 14:27', text: 'Peace I leave with you, my peace I give unto you: not as the world giveth, give I unto you. Let not your heart be troubled, neither let it be afraid.' },
+    { ref: 'Psalm 4:8', text: 'I will both lay me down in peace, and sleep: for thou, LORD, only makest me dwell in safety.' },
+    { ref: 'Mark 11:24', text: 'Therefore I say unto you, What things soever ye desire, when ye pray, believe that ye receive them, and ye shall have them.' },
+    { ref: 'Mark 9:23', text: 'Jesus said unto him, If thou canst believe, all things are possible to him that believeth.' },
+    { ref: 'Romans 10:9-10', text: 'That if thou shalt confess with thy mouth the Lord Jesus, and shalt believe in thine heart that God hath raised him from the dead, thou shalt be saved. For with the heart man believeth unto righteousness; and with the mouth confession is made unto salvation.' },
+    { ref: 'Luke 1:37', text: 'For with God nothing shall be impossible.' },
+    { ref: 'Habakkuk 3:19', text: 'The LORD God is my strength, and he will make my feet like hinds\u2019 feet, and he will make me to walk upon mine high places.' },
+    { ref: 'Romans 5:8', text: 'But God commendeth his love toward us, in that, while we were yet sinners, Christ died for us.' },
+    { ref: 'Ephesians 4:32', text: 'And be ye kind one to another, tenderhearted, forgiving one another, even as God for Christ\u2019s sake hath forgiven you.' },
+    { ref: '1 John 4:7-8', text: 'Beloved, let us love one another: for love is of God; and every one that loveth is born of God, and knoweth God. He that loveth not knoweth not God; for God is love.' },
+    { ref: '1 John 4:18', text: 'There is no fear in love; but perfect love casteth out fear: because fear hath torment. He that feareth is not made perfect in love.' },
+    { ref: 'John 15:13', text: 'Greater love hath no man than this, that a man lay down his life for his friends.' },
+    { ref: 'Romans 15:13', text: 'Now the God of hope fill you with all joy and peace in believing, that ye may abound in hope, through the power of the Holy Ghost.' },
+    { ref: 'Psalm 42:1', text: 'As the hart panteth after the water brooks, so panteth my soul after thee, O God.' },
+    { ref: '1 Thessalonians 5:16-18', text: 'Rejoice evermore. Pray without ceasing. In every thing give thanks: for this is the will of God in Christ Jesus concerning you.' },
+    { ref: 'James 1:5', text: 'If any of you lack wisdom, let him ask of God, that giveth to all men liberally, and upbraideth not; and it shall be given him.' },
+    { ref: 'Proverbs 27:17', text: 'Iron sharpeneth iron; so a man sharpeneth the countenance of his friend.' },
+    { ref: 'Psalm 119:105', text: 'Thy word is a lamp unto my feet, and a light unto my path.' },
+    { ref: '2 Corinthians 4:16-18', text: 'For which cause we faint not; but though our outward man perish, yet the inward man is renewed day by day. For our light affliction, which is but for a moment, worketh for us a far more exceeding and eternal weight of glory; while we look not at the things which are seen, but at the things which are not seen: for the things which are seen are temporal; but the things which are not seen are eternal.' },
+    { ref: 'Matthew 6:14-15', text: 'For if ye forgive men their trespasses, your heavenly Father will also forgive you: but if ye forgive not men their trespasses, neither will your Father forgive your trespasses.' },
+    { ref: 'Colossians 3:13', text: 'Forbearing one another, and forgiving one another, if any man have a quarrel against any: even as Christ forgave you, so also do ye.' },
+    { ref: 'Mark 11:25', text: 'And when ye stand praying, forgive, if ye have ought against any: that your Father also which is in heaven may forgive you your trespasses.' },
+    { ref: 'Luke 6:37', text: 'Judge not, and ye shall not be judged: condemn not, and ye shall not be condemned: forgive, and ye shall be forgiven.' },
+    { ref: 'Psalm 103:12', text: 'As far as the east is from the west, so far hath he removed our transgressions from us.' },
+    { ref: 'John 15:11', text: 'These things have I spoken unto you, that my joy might remain in you, and that your joy might be full.' },
+    { ref: 'Philippians 4:4', text: 'Rejoice in the Lord alway: and again I say, Rejoice.' },
+    { ref: 'Revelation 1:8', text: 'I am Alpha and Omega, the beginning and the ending, saith the Lord, which is, and which was, and which is to come, the Almighty.' },
+    { ref: 'Revelation 21:5', text: 'And he that sat upon the throne said, Behold, I make all things new. And he said unto me, Write: for these words are true and faithful.' },
+    { ref: 'Revelation 22:13', text: 'I am Alpha and Omega, the beginning and the end, the first and the last.' },
+    { ref: 'Revelation 3:11', text: 'Behold, I come quickly: hold that fast which thou hast, that no man take thy crown.' },
+    { ref: 'Revelation 12:11', text: 'And they overcame him by the blood of the Lamb, and by the word of their testimony; and they loved not their lives unto the death.' },
+    { ref: 'Psalm 119:11', text: 'Thy word have I hid in mine heart, that I might not sin against thee.' },
+    { ref: 'Isaiah 9:6', text: 'For unto us a child is born, unto us a son is given: and the government shall be upon his shoulder: and his name shall be called Wonderful, Counsellor, The mighty God, The everlasting Father, The Prince of Peace.' },
+    { ref: 'Isaiah 43:18-19', text: 'Remember ye not the former things, neither consider the things of old. Behold, I will do a new thing; now it shall spring forth; shall ye not know it? I will even make a way in the wilderness, and rivers in the desert.' },
+    { ref: 'Isaiah 54:17', text: 'No weapon that is formed against thee shall prosper; and every tongue that shall rise against thee in judgment thou shalt condemn. This is the heritage of the servants of the LORD, and their righteousness is of me, saith the LORD.' },
+    { ref: 'Jeremiah 33:3', text: 'Call unto me, and I will answer thee, and shew thee great and mighty things, which thou knowest not.' },
+    { ref: 'Zechariah 4:6', text: 'This is the word of the LORD unto Zerubbabel, saying, Not by might, nor by power, but by my spirit, saith the LORD of hosts.' },
+    { ref: 'Matthew 6:26', text: 'Behold the fowls of the air: for they sow not, neither do they reap, nor gather into barns; yet your heavenly Father feedeth them. Are ye not much better than they?' },
+    { ref: 'Matthew 28:6', text: 'He is not here: for he is risen, as he said. Come, see the place where the Lord lay.' },
+    { ref: 'John 11:25-26', text: 'Jesus said unto her, I am the resurrection, and the life: he that believeth in me, though he were dead, yet shall he live: and whosoever liveth and believeth in me shall never die. Believest thou this?' },
+    { ref: 'Romans 8:1', text: 'There is therefore now no condemnation to them which are in Christ Jesus, who walk not after the flesh, but after the Spirit.' },
+    { ref: 'Romans 8:38-39', text: 'For I am persuaded, that neither death, nor life, nor angels, nor principalities, nor powers, nor things present, nor things to come, nor height, nor depth, nor any other creature, shall be able to separate us from the love of God, which is in Christ Jesus our Lord.' },
+    { ref: '1 Corinthians 15:57', text: 'But thanks be to God, which giveth us the victory through our Lord Jesus Christ.' },
+    { ref: '2 Corinthians 5:7', text: 'For we walk by faith, not by sight.' },
+    { ref: 'Ephesians 2:10', text: 'For we are his workmanship, created in Christ Jesus unto good works, which God hath before ordained that we should walk in them.' },
+    { ref: 'Hebrews 13:8', text: 'Jesus Christ the same yesterday, and to day, and for ever.' },
+    { ref: 'Revelation 3:20', text: 'Behold, I stand at the door, and knock: if any man hear my voice, and open the door, I will come in to him, and will sup with him, and he with me.' },
+    { ref: 'Revelation 21:4', text: 'And God shall wipe away all tears from their eyes; and there shall be no more death, neither sorrow, nor crying, neither shall there be any more pain: for the former things are passed away.' },
+    { ref: '1 John 1:9', text: 'If we confess our sins, he is faithful and just to forgive us our sins, and to cleanse us from all unrighteousness.' },
+    { ref: 'Nehemiah 8:10', text: 'Then he said unto them, Go your way, eat the fat, and drink the sweet, and send portions unto them for whom nothing is prepared: for this day is holy unto our Lord: neither be ye sorry; for the joy of the LORD is your strength.' }
   ];
 
   var REFLECT_PROMPTS = [
@@ -289,6 +541,20 @@
     'What are you grateful for this morning?'
   ];
 
+  var READING_PLANS = {
+    peace: { name: 'Peace', verses: ['Philippians 4:6-7','Isaiah 26:3','John 14:27','Psalm 4:8','Psalm 91:1-2','Matthew 11:28','Psalm 46:10'] },
+    faith: { name: 'Faith', verses: ['Hebrews 11:1','Mark 11:24','Mark 9:23','Romans 10:9-10','2 Corinthians 5:17','James 1:2-4','Luke 1:37'] },
+    strength: { name: 'Strength', verses: ['Isaiah 41:10','Philippians 4:13','Joshua 1:9','Isaiah 40:31','2 Timothy 1:7','Psalm 27:1','Habakkuk 3:19'] },
+    love: { name: 'Love', verses: ['1 Corinthians 13:4-7','John 3:16','Romans 5:8','Ephesians 4:32','1 John 4:7-8','1 John 4:18','John 15:13'] },
+    hope: { name: 'Hope', verses: ['Jeremiah 29:11','Romans 15:13','Psalm 42:1','Lamentations 3:22-23','Romans 8:28','Hebrews 11:1','Isaiah 40:31'] },
+    gratitude: { name: 'Gratitude', verses: ['Psalm 100:4-5','1 Thessalonians 5:16-18','Psalm 118:24','Colossians 3:23','Psalm 30:5','Philippians 4:6-7','James 1:2-4'] },
+    wisdom: { name: 'Wisdom', verses: ['Proverbs 3:5-6','Proverbs 16:3','James 1:5','Proverbs 18:10','Proverbs 27:17','Romans 12:2','Psalm 119:105'] },
+    comfort: { name: 'Comfort', verses: ['Psalm 23:1','Psalm 34:18','Matthew 11:28','2 Corinthians 4:16-18','Psalm 55:22','Isaiah 41:10','Psalm 73:26'] },
+    revelation: { name: 'Revelation', verses: ['Revelation 1:8','Revelation 3:11','Revelation 3:20','Revelation 12:11','Revelation 21:4','Revelation 21:5','Revelation 22:13'] },
+    forgiveness: { name: 'Forgiveness', verses: ['Matthew 6:14-15','Ephesians 4:32','Colossians 3:13','Mark 11:25','1 John 1:9','Luke 6:37','Psalm 103:12'] },
+    joy: { name: 'Joy', verses: ['Nehemiah 8:10','Psalm 16:11','Psalm 30:5','John 15:11','Romans 15:13','Philippians 4:4','James 1:2-4'] }
+  };
+
   function dayOfYear(d){ var start = new Date(d.getFullYear(),0,0); return Math.floor((d-start)/86400000); }
   function todayKey(){
     var d = new Date();
@@ -297,22 +563,190 @@
   function startOfDay(d){ var x = new Date(d); x.setHours(0,0,0,0); return x; }
   function escapeHTML(s){ return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 
-  var STORAGE_JOURNAL = 'pereselah_journal';
-  var STORAGE_FAVES = 'pereselah_favorites';
+  // ---- Auth screen wiring ----
+  var authScreen = document.getElementById('authScreen');
+  var appMain = document.getElementById('appMain');
+  var profileCorner = document.getElementById('profileCorner');
+  var authSub = document.getElementById('authSub');
+  var authEmail = document.getElementById('authEmail');
+  var authPassword = document.getElementById('authPassword');
+  var authSubmit = document.getElementById('authSubmit');
+  var authError = document.getElementById('authError');
+  var authNote = document.getElementById('authNote');
+  var authSwitchText = document.getElementById('authSwitchText');
+  var authSwitchBtn = document.getElementById('authSwitchBtn');
+  var avatarBtn = document.getElementById('avatarBtn');
+  var avatarMenu = document.getElementById('avatarMenu');
+  var avatarEmail = document.getElementById('avatarEmail');
+  var signOutBtn = document.getElementById('signOutBtn');
+  var authMode = 'signin';
 
-  function loadJournal(){ try{ return JSON.parse(localStorage.getItem(STORAGE_JOURNAL)) || {}; }catch(e){ return {}; } }
-  function saveJournal(j){ localStorage.setItem(STORAGE_JOURNAL, JSON.stringify(j)); }
-  function loadFaves(){ try{ return JSON.parse(localStorage.getItem(STORAGE_FAVES)) || []; }catch(e){ return []; } }
-  function saveFaves(f){ localStorage.setItem(STORAGE_FAVES, JSON.stringify(f)); }
+  function setAuthMode(m){
+    authMode = m;
+    authError.classList.add('hidden');
+    authNote.classList.add('hidden');
+    if(m === 'signin'){
+      authSub.textContent = 'Sign in to see your journal.';
+      authSubmit.textContent = 'Sign in';
+      authSwitchText.textContent = "Don't have an account?";
+      authSwitchBtn.textContent = 'Sign up';
+    } else {
+      authSub.textContent = 'Takes about ten seconds.';
+      authSubmit.textContent = 'Sign up';
+      authSwitchText.textContent = 'Already have an account?';
+      authSwitchBtn.textContent = 'Sign in';
+    }
+  }
+  authSwitchBtn.addEventListener('click', function(){ setAuthMode(authMode === 'signin' ? 'signup' : 'signin'); });
 
-  var journal = loadJournal();
-  var faves = loadFaves();
+  authSubmit.addEventListener('click', async function(){
+    var email = authEmail.value.trim();
+    var password = authPassword.value;
+    authError.classList.add('hidden');
+    authNote.classList.add('hidden');
+    if(!email || !password){
+      authError.textContent = 'Enter both email and password.';
+      authError.classList.remove('hidden');
+      return;
+    }
+    authSubmit.disabled = true;
+    try{
+      if(authMode === 'signin'){
+        var res = await supabase.auth.signInWithPassword({ email: email, password: password });
+        if(res.error) throw res.error;
+      } else {
+        var res2 = await supabase.auth.signUp({ email: email, password: password });
+        if(res2.error) throw res2.error;
+        if(res2.data && res2.data.user && !res2.data.session){
+          authNote.textContent = 'Check your email to confirm your account, then sign in.';
+          authNote.classList.remove('hidden');
+          setAuthMode('signin');
+        }
+      }
+    } catch(err){
+      authError.textContent = err.message || 'Something went wrong.';
+      authError.classList.remove('hidden');
+    }
+    authSubmit.disabled = false;
+  });
+  [authEmail, authPassword].forEach(function(el){
+    el.addEventListener('keydown', function(e){ if(e.key === 'Enter') authSubmit.click(); });
+  });
+  signOutBtn.addEventListener('click', async function(){ await supabase.auth.signOut(); });
+
+  avatarBtn.addEventListener('click', function(e){
+    e.stopPropagation();
+    avatarMenu.classList.toggle('hidden');
+  });
+  document.addEventListener('click', function(e){
+    if(!avatarMenu.classList.contains('hidden') && !e.target.closest('.profile-corner')){
+      avatarMenu.classList.add('hidden');
+    }
+  });
+
+  // ---- Supabase data sync ----
+  function syncJournalToday(){
+    if(!currentUserId) return;
+    supabase.from('journal_entries').upsert({
+      user_id: currentUserId,
+      entry_date: key,
+      verse_ref: journal[key].verseRef || null,
+      verse_text: journal[key].verseText || null,
+      reflection: journal[key].reflection || ''
+    }, { onConflict: 'user_id,entry_date' }).then(function(){});
+  }
+
+  function syncSavedVerse(ref, text, isAdding){
+    if(!currentUserId) return;
+    if(isAdding){
+      supabase.from('saved_verses').upsert({
+        user_id: currentUserId, verse_ref: ref, verse_text: text
+      }, { onConflict: 'user_id,verse_ref' }).then(function(){});
+    } else {
+      supabase.from('saved_verses').delete().eq('user_id', currentUserId).eq('verse_ref', ref).then(function(){});
+    }
+  }
+
+  function syncPlanState(){
+    if(!currentUserId) return;
+    supabase.from('user_settings').upsert({
+      user_id: currentUserId, plan_id: planState.id, plan_start_date: planState.startDate || null
+    }, { onConflict: 'user_id' }).then(function(){});
+  }
+
+  function syncReminderSettings(){
+    if(!currentUserId) return;
+    supabase.from('user_settings').upsert({
+      user_id: currentUserId,
+      reminder_on: localStorage.getItem('pereselah_reminder_on') === 'on',
+      reminder_time: localStorage.getItem('pereselah_reminder_time') || '07:00'
+    }, { onConflict: 'user_id' }).then(function(){});
+  }
+
+  async function fetchAllUserData(){
+    var jRes = await supabase.from('journal_entries').select('*').eq('user_id', currentUserId);
+    journal = {};
+    (jRes.data || []).forEach(function(row){
+      journal[row.entry_date] = { reflection: row.reflection, verseRef: row.verse_ref, verseText: row.verse_text };
+    });
+
+    var fRes = await supabase.from('saved_verses').select('*').eq('user_id', currentUserId).order('saved_at', { ascending: false });
+    faves = (fRes.data || []).map(function(row){ return { ref: row.verse_ref, text: row.verse_text }; });
+
+    var sRes = await supabase.from('user_settings').select('*').eq('user_id', currentUserId).maybeSingle();
+    if(sRes.data){
+      planState = { id: sRes.data.plan_id || 'random', startDate: sRes.data.plan_start_date };
+      localStorage.setItem('pereselah_reminder_on', sRes.data.reminder_on ? 'on' : 'off');
+      localStorage.setItem('pereselah_reminder_time', sRes.data.reminder_time || '07:00');
+    } else {
+      await supabase.from('user_settings').upsert({ user_id: currentUserId, plan_id: 'random' }, { onConflict: 'user_id' });
+      planState = { id: 'random' };
+    }
+  }
+
+  var journal = {};
+  var faves = [];
   var key = todayKey();
-  var todaysRef = VERSE_LIST[dayOfYear(new Date()) % VERSE_LIST.length];
+  var planState = { id: 'random' };
+
+  function computeTodaysRef(){
+    if(!planState || planState.id === 'random'){
+      return VERSE_LIST[dayOfYear(new Date()) % VERSE_LIST.length];
+    }
+    var plan = READING_PLANS[planState.id];
+    if(!plan) return VERSE_LIST[dayOfYear(new Date()) % VERSE_LIST.length];
+    var start = new Date(planState.startDate);
+    var daysSince = Math.floor((startOfDay(new Date()) - startOfDay(start)) / 86400000);
+    var dayIndex = ((daysSince % plan.verses.length) + plan.verses.length) % plan.verses.length;
+    return plan.verses[dayIndex];
+  }
+  function updatePlanDayLabel(){
+    var label = document.getElementById('planDayLabel');
+    if(!planState || planState.id === 'random'){ label.textContent = ''; return; }
+    var plan = READING_PLANS[planState.id];
+    var start = new Date(planState.startDate);
+    var daysSince = Math.floor((startOfDay(new Date()) - startOfDay(start)) / 86400000);
+    var dayIndex = ((daysSince % plan.verses.length) + plan.verses.length) % plan.verses.length;
+    label.textContent = plan.name + ' \u00b7 Day ' + (dayIndex + 1) + ' of ' + plan.verses.length;
+  }
+
+  var todaysRef;
   var promptIndex = dayOfYear(new Date()) % REFLECT_PROMPTS.length;
 
   document.getElementById('reflectPrompt').textContent = REFLECT_PROMPTS[promptIndex];
-  document.getElementById('todayLabel').textContent = new Date().toLocaleDateString('en-US', { weekday:'short', month:'short', day:'numeric' });
+
+  var planSelect = document.getElementById('planSelect');
+
+  planSelect.addEventListener('change', function(){
+    var planId = planSelect.value;
+    if(planState.id === planId) return;
+    planState = planId === 'random' ? { id: 'random' } : { id: planId, startDate: todayKey() };
+    syncPlanState();
+    todaysRef = computeTodaysRef();
+    updatePlanDayLabel();
+    delete journal[key];
+    loadVerse();
+  });
 
   function computeStreak(){
     var daySet = {};
@@ -350,6 +784,29 @@
     }, 45);
   }
 
+  var basketBtn = document.getElementById('basketBtn');
+  var basketMenu = document.getElementById('basketMenu');
+  basketBtn.addEventListener('click', function(e){
+    e.stopPropagation();
+    basketMenu.classList.toggle('hidden');
+  });
+  document.addEventListener('click', function(e){
+    if(!basketMenu.classList.contains('hidden') && !e.target.closest('.basket-menu') && !e.target.closest('.basket-btn')){
+      basketMenu.classList.add('hidden');
+    }
+  });
+  basketMenu.addEventListener('click', function(e){
+    if(e.target.closest('button')){
+      setTimeout(function(){ basketMenu.classList.add('hidden'); }, 150);
+    }
+  });
+
+  document.getElementById('replayBtn').addEventListener('click', function(){
+    if(!currentVerseText) return;
+    verseRef.classList.remove('show');
+    writeVerse(currentVerseText);
+  });
+
   function loadVerse(){
     if(journal[key] && journal[key].verseText){
       currentVerseText = journal[key].verseText;
@@ -369,22 +826,24 @@
         journal[key] = journal[key] || {};
         journal[key].verseRef = todaysRef;
         journal[key].verseText = currentVerseText;
-        saveJournal(journal);
+        syncJournalToday();
         writeVerse(currentVerseText);
       })
       .catch(function(){
-        // Offline or the API failed — fall back to one of the 40 built-in verses
-        var offlineVerse = OFFLINE_VERSES[dayOfYear(new Date()) % OFFLINE_VERSES.length];
+        // Offline or the API failed — first check if we have this EXACT verse's text
+        // built in (keeps reading plans on track even without internet). Only fall
+        // back to a random offline verse if the exact one truly isn't available.
+        var exactMatch = OFFLINE_VERSES.find(function(v){ return v.ref === todaysRef; });
+        var offlineVerse = exactMatch || OFFLINE_VERSES[dayOfYear(new Date()) % OFFLINE_VERSES.length];
         todaysRef = offlineVerse.ref;
         currentVerseText = offlineVerse.text;
         journal[key] = journal[key] || {};
         journal[key].verseRef = todaysRef;
         journal[key].verseText = currentVerseText;
-        saveJournal(journal);
+        syncJournalToday();
         writeVerse(currentVerseText);
       });
   }
-  loadVerse();
 
   var saveVerseBtn = document.getElementById('saveVerseBtn');
   function updateSaveBtn(){
@@ -395,9 +854,13 @@
   saveVerseBtn.addEventListener('click', function(){
     if(!currentVerseText) return;
     var idx = faves.findIndex(function(f){ return f.ref === todaysRef; });
-    if(idx === -1){ faves.unshift({ ref: todaysRef, text: currentVerseText, savedAt: new Date().toISOString() }); }
-    else { faves.splice(idx, 1); }
-    saveFaves(faves);
+    if(idx === -1){
+      faves.unshift({ ref: todaysRef, text: currentVerseText, savedAt: new Date().toISOString() });
+      syncSavedVerse(todaysRef, currentVerseText, true);
+    } else {
+      faves.splice(idx, 1);
+      syncSavedVerse(todaysRef, currentVerseText, false);
+    }
     updateSaveBtn();
     renderFavorites();
   });
@@ -497,8 +960,98 @@
 
   document.getElementById('downloadVerseBtn').addEventListener('click', downloadVerseCard);
 
+  // ---- Listen (text-to-speech) ----
+  var listenBtn = document.getElementById('listenBtn');
+  listenBtn.addEventListener('click', function(){
+    if(!currentVerseText) return;
+    if(!('speechSynthesis' in window)){
+      alert('Your browser doesn\u2019t support reading text aloud.');
+      return;
+    }
+    if(window.speechSynthesis.speaking){
+      window.speechSynthesis.cancel();
+      listenBtn.classList.remove('speaking');
+      listenBtn.textContent = '🔊 Listen';
+      return;
+    }
+    var utter = new SpeechSynthesisUtterance(currentVerseText);
+    utter.rate = 0.9;
+    utter.onend = function(){
+      listenBtn.classList.remove('speaking');
+      listenBtn.textContent = '🔊 Listen';
+    };
+    window.speechSynthesis.speak(utter);
+    listenBtn.classList.add('speaking');
+    listenBtn.textContent = '⏸ Stop';
+  });
+
+  // ---- Share (native share sheet, falls back to WhatsApp web link) ----
+  document.getElementById('shareWaBtn').addEventListener('click', function(){
+    if(!currentVerseText) return;
+    var text = '\u201c' + currentVerseText + '\u201d \u2014 ' + todaysRef + '\n\nvia Pereselah';
+    if(navigator.share){
+      navigator.share({ title: 'Pereselah', text: text }).catch(function(){});
+    } else {
+      window.open('https://wa.me/?text=' + encodeURIComponent(text), '_blank');
+    }
+  });
+
+  // ---- Daily reminder (browser notification, works while the app/tab is open) ----
+  var reminderToggle = document.getElementById('reminderToggle');
+  var reminderTimeInput = document.getElementById('reminderTime');
+  var STORAGE_REMINDER_ON = 'pereselah_reminder_on';
+  var STORAGE_REMINDER_TIME = 'pereselah_reminder_time';
+  var STORAGE_REMINDER_LAST = 'pereselah_reminder_last_fired';
+
+  var savedTime = localStorage.getItem(STORAGE_REMINDER_TIME);
+  if(savedTime) reminderTimeInput.value = savedTime;
+
+  function updateReminderBtn(){
+    var on = localStorage.getItem(STORAGE_REMINDER_ON) === 'on' && 'Notification' in window && Notification.permission === 'granted';
+    reminderToggle.classList.toggle('on', on);
+    reminderToggle.textContent = on ? '🔔 Reminder on' : '🔔 Daily reminder';
+  }
+  updateReminderBtn();
+
+  reminderToggle.addEventListener('click', async function(){
+    if(!('Notification' in window)){
+      alert('This browser does not support notifications.');
+      return;
+    }
+    if(localStorage.getItem(STORAGE_REMINDER_ON) === 'on'){
+      localStorage.setItem(STORAGE_REMINDER_ON, 'off');
+      updateReminderBtn();
+      syncReminderSettings();
+      return;
+    }
+    var perm = await Notification.requestPermission();
+    if(perm === 'granted'){
+      localStorage.setItem(STORAGE_REMINDER_ON, 'on');
+      new Notification('Pereselah', { body: 'Reminders are on \u2014 we\u2019ll nudge you at ' + reminderTimeInput.value + ' each day.' });
+    }
+    updateReminderBtn();
+    syncReminderSettings();
+  });
+
+  reminderTimeInput.addEventListener('change', function(){
+    localStorage.setItem(STORAGE_REMINDER_TIME, reminderTimeInput.value);
+    syncReminderSettings();
+  });
+
+  setInterval(function(){
+    if(localStorage.getItem(STORAGE_REMINDER_ON) !== 'on') return;
+    if(!('Notification' in window) || Notification.permission !== 'granted') return;
+    var now = new Date();
+    var nowHM = String(now.getHours()).padStart(2,'0') + ':' + String(now.getMinutes()).padStart(2,'0');
+    var target = localStorage.getItem(STORAGE_REMINDER_TIME) || '07:00';
+    var lastFired = localStorage.getItem(STORAGE_REMINDER_LAST);
+    if(nowHM === target && lastFired !== todayKey()){
+      new Notification('Pereselah', { body: '\ud83d\ude4f Time for your Selah \u2014 today\u2019s verse is waiting.' });
+      localStorage.setItem(STORAGE_REMINDER_LAST, todayKey());
+    }
+  }, 60000);
+
   var reflectionInput = document.getElementById('reflectionInput');
-  if(journal[key] && journal[key].reflection){ reflectionInput.value = journal[key].reflection; }
 
   document.getElementById('saveReflectionBtn').addEventListener('click', function(){
     journal[key] = journal[key] || {};
@@ -506,12 +1059,13 @@
     journal[key].verseRef = todaysRef;
     journal[key].verseText = currentVerseText;
     journal[key].date = key;
-    saveJournal(journal);
+    syncJournalToday();
     renderStreak();
     renderHistory();
     var note = document.getElementById('savedNote');
     note.classList.add('show');
     setTimeout(function(){ note.classList.remove('show'); }, 2000);
+    checkCelebrations(computeStreak());
   });
 
   function renderHistory(){
@@ -563,6 +1117,113 @@
       favoritesPanel.style.display = tab === 'favorites' ? 'block' : 'none';
     });
   });
+
+  var journalOverlay = document.getElementById('journalOverlay');
+  function openJournalOverlay(tab){
+    journalOverlay.classList.remove('hidden');
+    tabBtns.forEach(function(b){ b.classList.toggle('active', b.getAttribute('data-tab') === tab); });
+    historyPanel.style.display = tab === 'history' ? 'block' : 'none';
+    favoritesPanel.style.display = tab === 'favorites' ? 'block' : 'none';
+    window.scrollTo(0, 0);
+  }
+  document.getElementById('openJournalBtn').addEventListener('click', function(){ openJournalOverlay('history'); });
+  document.getElementById('openFavesBtn').addEventListener('click', function(){ openJournalOverlay('favorites'); });
+  document.getElementById('journalBackBtn').addEventListener('click', function(){
+    journalOverlay.classList.add('hidden');
+  });
+
+  // ---- Celebration confetti ----
+  function celebrate(){
+    var pieces = ['🎉','🎊','✨','🙌'];
+    for(var i = 0; i < 44; i++){
+      (function(){
+        var el = document.createElement('div');
+        el.textContent = pieces[Math.floor(Math.random() * pieces.length)];
+        el.style.position = 'fixed';
+        el.style.left = (Math.random() * 100) + 'vw';
+        el.style.top = '-30px';
+        el.style.fontSize = (14 + Math.random() * 16) + 'px';
+        el.style.zIndex = '999';
+        el.style.pointerEvents = 'none';
+        el.style.transition = 'transform 2.3s ease-in, opacity 2.3s ease-in';
+        document.body.appendChild(el);
+        requestAnimationFrame(function(){
+          el.style.transform = 'translateY(' + (100 + Math.random() * 20) + 'vh) rotate(' + (Math.random() * 360) + 'deg)';
+          el.style.opacity = '0';
+        });
+        setTimeout(function(){ el.remove(); }, 2500);
+      })();
+    }
+  }
+
+  function checkCelebrations(newStreak){
+    var celebrated = false;
+
+    if(planState && planState.id !== 'random'){
+      var plan = READING_PLANS[planState.id];
+      if(plan){
+        var daysSince = Math.floor((startOfDay(new Date()) - startOfDay(new Date(planState.startDate))) / 86400000);
+        var dayIndex = ((daysSince % plan.verses.length) + plan.verses.length) % plan.verses.length;
+        if(dayIndex === plan.verses.length - 1){
+          var completedKey = 'pereselah_completed_' + planState.id + '_' + planState.startDate;
+          if(!localStorage.getItem(completedKey)){
+            localStorage.setItem(completedKey, 'yes');
+            celebrated = true;
+          }
+        }
+      }
+    }
+
+    if(newStreak > 0 && newStreak % 7 === 0){
+      var lastCelebrated = parseInt(localStorage.getItem('pereselah_last_streak_celebrated') || '0', 10);
+      if(newStreak > lastCelebrated){
+        localStorage.setItem('pereselah_last_streak_celebrated', String(newStreak));
+        celebrated = true;
+      }
+    }
+
+    if(celebrated) celebrate();
+  }
+
+  function renderInitialState(){
+    todaysRef = computeTodaysRef();
+    document.getElementById('todayLabel').textContent = new Date().toLocaleDateString('en-US', { weekday:'short', month:'short', day:'numeric' });
+    updatePlanDayLabel();
+    planSelect.value = planState.id || 'random';
+    if(journal[key] && journal[key].reflection){ reflectionInput.value = journal[key].reflection; }
+    else { reflectionInput.value = ''; }
+    var savedTime = localStorage.getItem('pereselah_reminder_time');
+    if(savedTime) reminderTimeInput.value = savedTime;
+    updateReminderBtn();
+    renderStreak();
+    renderHistory();
+    renderFavorites();
+    loadVerse();
+  }
+
+  supabase.auth.onAuthStateChange(function(event, session){
+    if(session && session.user){
+      currentUserId = session.user.id;
+      currentUserEmail = session.user.email || '';
+      authScreen.classList.add('hidden');
+      appMain.classList.remove('hidden');
+      profileCorner.classList.remove('hidden');
+      avatarBtn.textContent = currentUserEmail.charAt(0).toUpperCase();
+      avatarEmail.textContent = currentUserEmail;
+      fetchAllUserData().then(renderInitialState);
+    } else {
+      currentUserId = null;
+      currentUserEmail = null;
+      authScreen.classList.remove('hidden');
+      appMain.classList.add('hidden');
+      profileCorner.classList.add('hidden');
+      avatarMenu.classList.add('hidden');
+      authEmail.value = '';
+      authPassword.value = '';
+    }
+  });
+
+  setAuthMode('signin');
 })();
 </script>
 
