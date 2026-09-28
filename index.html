@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pereselah — Pause. Reflect. Return.</title>
+<meta name="description" content="A quiet daily devotional. One verse, one reflection, every morning.">
+<meta name="theme-color" content="#1E140A">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icon-192.png" type="image/png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;600&family=Cinzel:wght@500;600&family=EB+Garamond:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
+<style>
+  :root{ --ink:#1E140A; --brown:#3E2A10; --gold:#C69A48; --gold2:#E3C078; --parch:#F1E4C0; --parch2:#E9D9AC; --bg:#DCCFA8; --mut:#6B5636; }
+  *{ margin:0; padding:0; box-sizing:border-box; }
+  html{ scroll-behavior:smooth; }
+  body{ background:var(--bg); color:var(--brown); font-family:'EB Garamond',serif; line-height:1.6; overflow-x:hidden; }
+  a{ color:inherit; }
+  .wrap{ max-width:1040px; margin:0 auto; padding:0 22px; }
+
+  /* NAV */
+  nav{ position:fixed; top:0; left:0; right:0; z-index:50; backdrop-filter:blur(14px); -webkit-backdrop-filter:blur(14px);
+    background:rgba(30,20,10,0.72); border-bottom:1px solid rgba(227,192,120,0.15); }
+  .nav-in{ display:flex; align-items:center; justify-content:space-between; height:60px; }
+  .wordmark{ font-family:'Cinzel',serif; font-size:15px; letter-spacing:3px; color:var(--gold2); font-weight:600; text-decoration:none; }
+  .links{ display:flex; gap:26px; align-items:center; font-size:14px; color:#CDBA8E; }
+  .links a{ text-decoration:none; } .links a:hover{ color:var(--gold2); }
+  .btn{ display:inline-block; text-decoration:none; font-family:'EB Garamond',serif; font-size:16px; font-weight:500;
+    padding:13px 28px; border-radius:30px; transition:transform .2s, box-shadow .2s; cursor:pointer; border:1px solid transparent; }
+  .btn:hover{ transform:translateY(-2px); }
+  .btn.gold{ background:linear-gradient(135deg,var(--gold2),var(--gold)); color:var(--ink); box-shadow:0 10px 30px -10px rgba(227,192,120,0.7); }
+  .btn.line{ border-color:rgba(227,192,120,0.5); color:var(--gold2); }
+  .btn.dark{ background:var(--brown); color:var(--parch); box-shadow:0 12px 28px -12px rgba(40,25,10,0.6); }
+  .btn.sm{ padding:8px 18px; font-size:14px; }
+
+  /* HERO */
+  .hero{ background:radial-gradient(ellipse 70% 55% at 50% 0%, rgba(198,154,72,0.32) 0%, transparent 70%), var(--ink);
+    color:var(--parch); text-align:center; padding:130px 0 90px; position:relative; }
+  .badge{ display:inline-block; font-size:12.5px; letter-spacing:1px; color:var(--gold2); border:1px solid rgba(227,192,120,0.35);
+    padding:6px 16px; border-radius:20px; background:rgba(227,192,120,0.08); }
+  .hero h1{ font-family:'Cinzel',serif; font-weight:600; font-size:clamp(34px,7vw,64px); line-height:1.1; letter-spacing:1px; margin:22px 0 16px;
+    background:linear-gradient(180deg,#FFF3D6,var(--gold2)); -webkit-background-clip:text; background-clip:text; color:transparent; }
+  .hero p.sub{ font-size:clamp(17px,2.4vw,21px); color:#CDBA8E; max-width:520px; margin:0 auto; }
+  .cta{ display:flex; gap:12px; justify-content:center; flex-wrap:wrap; margin-top:30px; }
+  .fine{ font-size:12.5px; color:#9C8A62; margin-top:14px; font-style:italic; }
+
+  .scroll{ max-width:560px; margin:56px auto 0; filter:drop-shadow(0 30px 50px rgba(0,0,0,0.55)); }
+  .rod{ height:18px; border-radius:9px; position:relative; z-index:2;
+    background:linear-gradient(180deg,#8A5A2E,#6B4423 22%,#4A2E15 55%,#6B4423 80%,#8A5A2E); }
+  .rod::before,.rod::after{ content:''; position:absolute; top:-5px; width:20px; height:28px; border-radius:10px;
+    background:radial-gradient(circle at 35% 30%,#A8763E,#5C3A1C 70%,#3A2410); }
+  .rod::before{ left:-10px; } .rod::after{ right:-10px; }
+  .parchment{ margin:-2px 8px 0; padding:38px 30px 30px; min-height:170px; display:flex; flex-direction:column; justify-content:center;
+    background:linear-gradient(135deg,var(--parch),var(--parch2) 50%,#EFE0B8); color:var(--brown);
+    box-shadow:inset 0 12px 20px -12px rgba(60,40,10,0.35), inset 0 -12px 20px -12px rgba(60,40,10,0.35); }
+  #verse{ font-family:'Caveat',cursive; font-size:clamp(24px,4.4vw,32px); line-height:1.4; min-height:2.8em; display:block; text-align:center; }
+  .quill{ display:inline-block; margin-left:3px; vertical-align:-3px; animation:bob .5s ease-in-out infinite alternate; transform-origin:bottom left; }
+  @keyframes bob{ from{ transform:rotate(-6deg); } to{ transform:rotate(4deg) translateY(-2px); } }
+  #ref{ margin-top:8px; font-style:italic; font-size:13px; color:#8A6E3A; opacity:0; transition:opacity .6s; }
+  #ref.on{ opacity:1; }
+
+  /* SECTIONS */
+  section.pad{ padding:88px 0 0; }
+  .eyebrow{ font-family:'Cinzel',serif; font-size:12px; letter-spacing:3px; color:#8A6E3A; text-align:center; }
+  h2{ font-family:'Cinzel',serif; font-weight:600; font-size:clamp(26px,4.4vw,38px); text-align:center; margin:10px 0 12px; line-height:1.2; }
+  .lead{ text-align:center; color:var(--mut); font-size:18px; max-width:520px; margin:0 auto 40px; }
+
+  .steps{ display:grid; grid-template-columns:repeat(3,1fr); gap:16px; counter-reset:s; }
+  .step{ background:rgba(255,250,235,0.55); border:1px solid rgba(184,152,88,0.5); border-radius:18px; padding:26px 22px; position:relative; }
+  .step::before{ counter-increment:s; content:'0' counter(s); font-family:'Cinzel',serif; font-size:13px; letter-spacing:2px; color:var(--gold); }
+  .step h3{ font-size:21px; font-weight:500; margin:8px 0 6px; } .step p{ color:var(--mut); font-size:15.5px; }
+
+  /* APP PREVIEW */
+  .preview{ display:grid; grid-template-columns:1fr 1fr; gap:40px; align-items:center; }
+  .preview h2,.preview .eyebrow,.preview .lead{ text-align:left; margin-left:0; }
+  .ticks{ list-style:none; margin-top:6px; } .ticks li{ padding:6px 0 6px 30px; position:relative; font-size:16.5px; }
+  .ticks li::before{ content:'✓'; position:absolute; left:0; top:6px; width:20px; height:20px; border-radius:50%; background:var(--brown); color:var(--parch); font-size:12px; text-align:center; line-height:20px; }
+  .phone{ max-width:300px; margin:0 auto; width:100%; background:var(--ink); border-radius:34px; padding:12px; box-shadow:0 40px 60px -25px rgba(30,20,10,0.6); transform:rotate(2deg); }
+  .screen{ background:var(--bg); border-radius:24px; padding:20px 16px 18px; text-align:center; }
+  .screen .wm{ font-family:'Cinzel',serif; font-size:11px; letter-spacing:3px; color:#6B4E20; }
+  .chip{ display:inline-block; border:1px solid #B89858; border-radius:20px; padding:3px 12px; font-size:11.5px; color:#6B4E20; margin:10px 0; }
+  .mini{ background:linear-gradient(135deg,var(--parch),var(--parch2)); border-radius:8px; padding:18px 14px; box-shadow:inset 0 0 0 1px rgba(184,152,88,0.4); }
+  .mini .v{ font-family:'Caveat',cursive; font-size:19px; line-height:1.3; } .mini .r{ font-size:10.5px; font-style:italic; color:#8A6E3A; margin-top:4px; }
+  .note{ margin-top:10px; background:rgba(255,250,235,0.6); border:1px solid #C9AF75; border-radius:8px; padding:10px; text-align:left; }
+  .note b{ font-family:'Cinzel',serif; font-size:8.5px; letter-spacing:1.5px; color:#8A6E3A; font-weight:500; }
+  .note div{ font-family:'Caveat',cursive; font-size:15px; margin-top:2px; }
+  .savebtn{ margin-top:10px; background:var(--brown); color:var(--parch); font-size:11px; padding:6px 14px; border-radius:16px; display:inline-block; }
+
+  .grid{ display:grid; grid-template-columns:repeat(3,1fr); gap:16px; }
+  .card{ background:rgba(255,250,235,0.55); border:1px solid rgba(184,152,88,0.5); border-radius:18px; padding:26px 22px; transition:transform .25s, box-shadow .25s; }
+  .card:hover{ transform:translateY(-4px); box-shadow:0 22px 40px -22px rgba(40,25,10,0.5); }
+  .ic{ width:46px; height:46px; border-radius:14px; display:grid; place-items:center; font-size:22px; background:linear-gradient(135deg,var(--parch),var(--parch2)); box-shadow:inset 0 0 0 1px rgba(184,152,88,0.6); }
+  .card h3{ font-size:20px; font-weight:500; margin:14px 0 6px; } .card p{ color:var(--mut); font-size:15.5px; }
+
+  .plans{ display:flex; flex-wrap:wrap; gap:10px; justify-content:center; }
+  .plans span{ background:rgba(255,250,235,0.6); border:1px solid #B89858; border-radius:24px; padding:8px 20px; font-size:16px; }
+
+  .sync{ background:var(--ink); color:var(--parch); border-radius:24px; padding:44px 30px; text-align:center;
+    background-image:radial-gradient(ellipse 60% 90% at 50% 0%, rgba(198,154,72,0.28), transparent 70%); }
+  .sync h2{ color:var(--gold2); margin-top:0; } .sync p{ color:#CDBA8E; max-width:520px; margin:0 auto; font-size:17px; }
+
+  details{ background:rgba(255,250,235,0.55); border:1px solid rgba(184,152,88,0.5); border-radius:14px; padding:18px 22px; margin-bottom:10px; max-width:720px; margin-left:auto; margin-right:auto; }
+  summary{ cursor:pointer; font-size:18px; font-weight:500; list-style:none; display:flex; justify-content:space-between; gap:10px; }
+  summary::after{ content:'+'; color:var(--gold); font-size:22px; line-height:1; } details[open] summary::after{ content:'–'; }
+  details p{ color:var(--mut); margin-top:10px; font-size:16px; }
+
+  .final{ background:var(--ink); color:var(--parch); text-align:center; padding:84px 22px; margin-top:96px;
+    background-image:radial-gradient(ellipse 60% 80% at 50% 100%, rgba(198,154,72,0.3), transparent 70%); }
+  .final h2{ color:var(--gold2); margin-top:0; } .final p{ font-family:'Caveat',cursive; font-size:27px; color:#E9D9AC; margin-bottom:26px; }
+  footer{ background:var(--ink); text-align:center; padding:0 20px 44px; color:#9C8A62; font-size:11px; letter-spacing:1px; }
+
+  .rv{ opacity:0; transform:translateY(26px); transition:opacity .8s ease, transform .8s ease; } .rv.in{ opacity:1; transform:none; }
+
+  @media (max-width:820px){ .steps,.grid{ grid-template-columns:1fr; } .preview{ grid-template-columns:1fr; } .links a.hide{ display:none; } .hero{ padding-top:110px; } }
+  @media (prefers-reduced-motion:reduce){ .rv{ opacity:1; transform:none; transition:none; } html{ scroll-behavior:auto; } .quill{ animation:none; } }
+</style>
+</head>
+<body>
+
+<nav><div class="wrap nav-in">
+  <a class="wordmark" href="#top">PERESELAH</a>
+  <div class="links">
+    <a class="hide" href="#how">How it works</a><a class="hide" href="#features">Features</a><a class="hide" href="#faq">FAQ</a>
+    <a href="app.html">Sign in</a><a class="btn gold sm" href="app.html">Get Started</a>
+  </div>
+</div></nav>
+
+<header class="hero" id="top"><div class="wrap">
+  <span class="badge">✦ A quiet devotional for every morning</span>
+  <h1>Pause. Reflect. Return.</h1>
+  <p class="sub">One verse, written out for you each day. A few honest thoughts. A habit that gently grows.</p>
+  <div class="cta"><a class="btn gold" href="app.html">Get Started</a><a class="btn line" href="#how">See how it works</a></div>
+  <div class="fine">Create your account in about ten seconds.</div>
+
+  <div class="scroll" aria-label="A verse being written">
+    <div class="rod"></div>
+    <div class="parchment"><div id="verse"></div><div id="ref"></div></div>
+    <div class="rod"></div>
+  </div>
+</div></header>
+
+<section class="pad" id="how"><div class="wrap">
+  <div class="eyebrow rv">HOW IT WORKS</div>
+  <h2 class="rv">Five quiet minutes. Every day.</h2>
+  <p class="lead rv">No feeds, no noise. Just the Word and a moment to think.</p>
+  <div class="steps">
+    <div class="step rv"><h3>Pause</h3><p>Open Pereselah and watch today's verse write itself across the scroll.</p></div>
+    <div class="step rv"><h3>Reflect</h3><p>Answer a gentle prompt in your own words. Your journal is private to you.</p></div>
+    <div class="step rv"><h3>Return</h3><p>Come back tomorrow. Your streak grows and celebrates you along the way.</p></div>
+  </div>
+</div></section>
+
+<section class="pad"><div class="wrap preview">
+  <div>
+    <div class="eyebrow rv">MADE FOR MOBILE</div>
+    <h2 class="rv">Simple enough to open every day.</h2>
+    <p class="lead rv" style="margin-bottom:18px">Everything you need on one calm screen.</p>
+    <ul class="ticks rv"><li>Today's verse and reflection together</li><li>Your streak, always in view</li><li>Add it to your home screen like an app</li><li>Works beautifully on phone and desktop</li></ul>
+  </div>
+  <div class="phone rv"><div class="screen">
+    <div class="wm">PERESELAH</div><div class="chip">🔥 7 day streak</div>
+    <div class="mini"><div class="v">Casting all your care upon him; for he careth for you.</div><div class="r">1 Peter 5:7</div></div>
+    <div class="note"><b>TODAY'S REFLECTION</b><div>Lord, I hand this week to you…</div></div>
+    <span class="savebtn">Save reflection</span>
+  </div></div>
+</div></section>
+
+<section class="pad" id="features"><div class="wrap">
+  <div class="eyebrow rv">FEATURES</div>
+  <h2 class="rv">Everything for a steady habit.</h2>
+  <p class="lead rv">Thoughtful tools, none of the clutter.</p>
+  <div class="grid">
+    <div class="card rv"><div class="ic">🌅</div><h3>A verse each morning</h3><p>A fresh verse every day, written out with a quill as you watch.</p></div>
+    <div class="card rv"><div class="ic">✍️</div><h3>Private journal</h3><p>Reflect on each verse and look back on how you've grown.</p></div>
+    <div class="card rv"><div class="ic">📖</div><h3>Reading plans</h3><p>Follow themed 7-day plans, or let each day surprise you.</p></div>
+    <div class="card rv"><div class="ic">🔥</div><h3>Streaks &amp; celebrations</h3><p>Build consistency and enjoy a little confetti at each milestone.</p></div>
+    <div class="card rv"><div class="ic">🔔</div><h3>Daily reminder</h3><p>Choose your time and get a gentle nudge to pause.</p></div>
+    <div class="card rv"><div class="ic">🔊</div><h3>Listen, save &amp; share</h3><p>Hear a verse read aloud, save favorites, or share it as a beautiful card.</p></div>
+  </div>
+</div></section>
+
+<section class="pad"><div class="wrap">
+  <div class="eyebrow rv">READING PLANS</div>
+  <h2 class="rv">Walk through what you need most.</h2>
+  <p class="lead rv">Eleven themed plans, seven days each.</p>
+  <div class="plans rv"><span>Peace</span><span>Faith</span><span>Strength</span><span>Love</span><span>Hope</span><span>Gratitude</span><span>Wisdom</span><span>Comfort</span><span>Revelation</span><span>Forgiveness</span><span>Joy</span></div>
+</div></section>
+
+<section class="pad"><div class="wrap"><div class="sync rv">
+  <h2>Your journal, on every device.</h2>
+  <p>Sign in once and your reflections, saved verses and reading plan follow you wherever you open Pereselah.</p>
+</div></div></section>
+
+<section class="pad" id="faq"><div class="wrap">
+  <div class="eyebrow rv">QUESTIONS</div>
+  <h2 class="rv">Good to know.</h2><p class="lead rv"></p>
+  <details class="rv"><summary>Is my journal private?</summary><p>Yes. Your entries are tied to your account and only you can read them.</p></details>
+  <details class="rv"><summary>Do I need an account?</summary><p>Yes, a quick sign-up with your email. It's what lets your journal and saved verses sync across devices.</p></details>
+  <details class="rv"><summary>What if I miss a day?</summary><p>No pressure. Your streak simply starts again, and your journal keeps everything you've written.</p></details>
+  <details class="rv"><summary>Can I use it on my phone?</summary><p>Absolutely. It works in any modern browser, and you can add it to your home screen to open it like an app.</p></details>
+</div></section>
+
+<div class="final"><div class="wrap rv">
+  <h2>Begin today.</h2><p>Your first quiet morning is waiting.</p>
+  <a class="btn gold" href="app.html">Get Started</a>
+</div></div>
+
+<footer>
+  <div style="padding-top:34px">PERESELAH · MADE FOR QUIET MORNINGS</div>
+  <div style="margin-top:6px">Made by PereFalc</div><div style="margin-top:4px">© 2026 Pereselah</div>
+</footer>
+
+<svg width="0" height="0" style="position:absolute"><symbol id="q" viewBox="0 0 24 24">
+  <path d="M20 4 C14 5 6 12 3 20 L5 22 C13 19 20 11 21 5 Z" fill="#3E2A10"/><path d="M3 20 L1 23" stroke="#3E2A10" stroke-width="1.5" stroke-linecap="round"/></symbol></svg>
+
+<script>
+(function(){
+  var V=[
+    ['The LORD is my shepherd; I shall not want.','Psalm 23:1'],
+    ['I can do all things through Christ which strengtheneth me.','Philippians 4:13'],
+    ['Casting all your care upon him; for he careth for you.','1 Peter 5:7'],
+    ['Rejoice in the Lord alway: and again I say, Rejoice.','Philippians 4:4'],
+    ['For with God nothing shall be impossible.','Luke 1:37']
+  ];
+  var verse=document.getElementById('verse'), ref=document.getElementById('ref'), i=0;
+  function esc(s){ return s.replace(/&/g,'&amp;').replace(/</g,'&lt;'); }
+  function write(){
+    var t=V[i][0], n=0; ref.classList.remove('on'); ref.textContent=V[i][1];
+    var timer=setInterval(function(){
+      n++;
+      verse.innerHTML=esc(t.slice(0,n))+'<svg class="quill" width="20" height="20"><use href="#q"/></svg>';
+      if(n>=t.length){
+        clearInterval(timer); verse.textContent=t; ref.classList.add('on');
+        setTimeout(function(){ verse.style.transition='opacity .6s'; verse.style.opacity=0; ref.classList.remove('on');
+          setTimeout(function(){ verse.style.opacity=1; i=(i+1)%V.length; write(); },700); },3200);
+      }
+    },55);
+  }
+  write();
+
+  var els=document.querySelectorAll('.rv');
+  if('IntersectionObserver' in window){
+    var io=new IntersectionObserver(function(es){ es.forEach(function(e){ if(e.isIntersecting){ e.target.classList.add('in'); io.unobserve(e.target); } }); },{threshold:.12});
+    els.forEach(function(el){ io.observe(el); });
+  } else { els.forEach(function(el){ el.classList.add('in'); }); }
+})();
+</script>
+</body>
+</html>
