@@ -129,6 +129,7 @@
   }
   .saved-note{ font-size: 11.5px; color:#4F6B3E; opacity:0; transition: opacity 0.3s; }
   .saved-note.show{ opacity:1; }
+  .saved-note.err{ color:#7A2E10; }
 
   .tabs{ display:flex; gap:8px; margin: 26px 6px 0; }
   .tab-btn{
@@ -202,14 +203,15 @@
   .auth-note{ background: #EEDEB8; color: #6B4E1A; font-size: 12.5px; padding: 9px 12px; border-radius: 6px; margin-bottom: 14px; }
 
   /* PROFILE CORNER */
-  .profile-corner{ position:absolute; top:30px; left:20px; }
+  .profile-corner{ position:absolute; top:30px; right:20px; z-index:90; }
+  .profile-corner.on-overlay{ top:22px; }
   #avatarBtn{
     width: 32px; height: 32px; border-radius: 50%; background: #3E2A10; color: #F1E4C0;
     border: none; font-family: 'Cinzel', serif; font-size: 13px; font-weight: 600;
     cursor:pointer; display:flex; align-items:center; justify-content:center;
   }
   .avatar-menu{
-    position:absolute; top: 40px; left: 0; background: linear-gradient(135deg,#F1E4C0,#E9D9AC); border: 1px solid #B89858;
+    position:absolute; top: 40px; right: 0; background: linear-gradient(135deg,#F1E4C0,#E9D9AC); border: 1px solid #B89858;
     border-radius: 10px; min-width: 190px; box-shadow: 0 12px 30px -10px rgba(40,25,10,0.3);
     padding: 6px; z-index: 50;
   }
@@ -648,42 +650,54 @@
   });
 
   // ---- Supabase data sync ----
-  function syncJournalToday(){
-    if(!currentUserId) return;
-    supabase.from('journal_entries').upsert({
+  // Every sync returns a promise that resolves to { error } so callers can react to failures.
+  function safe(promise, label){
+    return promise.then(function(res){
+      if(res && res.error) console.error('Pereselah sync failed (' + label + '):', res.error);
+      return res || {};
+    }).catch(function(err){
+      console.error('Pereselah sync failed (' + label + '):', err);
+      return { error: err };
+    });
+  }
+
+  // includeReflection = true ONLY when the user is actually saving a reflection.
+  // An upsert only touches the columns it sends, so verse-only syncs can never blank a saved reflection.
+  function syncJournalToday(includeReflection){
+    if(!currentUserId) return Promise.resolve({ error: new Error('not signed in') });
+    var entry = journal[key] || {};
+    var row = {
       user_id: currentUserId,
       entry_date: key,
-      verse_ref: journal[key].verseRef || null,
-      verse_text: journal[key].verseText || null,
-      reflection: journal[key].reflection || ''
-    }, { onConflict: 'user_id,entry_date' }).then(function(){});
+      verse_ref: entry.verseRef || null,
+      verse_text: entry.verseText || null
+    };
+    if(includeReflection) row.reflection = entry.reflection || '';
+    return safe(supabase.from('journal_entries').upsert(row, { onConflict: 'user_id,entry_date' }), 'journal');
   }
 
   function syncSavedVerse(ref, text, isAdding){
-    if(!currentUserId) return;
-    if(isAdding){
-      supabase.from('saved_verses').upsert({
-        user_id: currentUserId, verse_ref: ref, verse_text: text
-      }, { onConflict: 'user_id,verse_ref' }).then(function(){});
-    } else {
-      supabase.from('saved_verses').delete().eq('user_id', currentUserId).eq('verse_ref', ref).then(function(){});
-    }
+    if(!currentUserId) return Promise.resolve({ error: new Error('not signed in') });
+    var q = isAdding
+      ? supabase.from('saved_verses').upsert({ user_id: currentUserId, verse_ref: ref, verse_text: text }, { onConflict: 'user_id,verse_ref' })
+      : supabase.from('saved_verses').delete().eq('user_id', currentUserId).eq('verse_ref', ref);
+    return safe(q, 'saved_verses');
   }
 
   function syncPlanState(){
-    if(!currentUserId) return;
-    supabase.from('user_settings').upsert({
+    if(!currentUserId) return Promise.resolve({});
+    return safe(supabase.from('user_settings').upsert({
       user_id: currentUserId, plan_id: planState.id, plan_start_date: planState.startDate || null
-    }, { onConflict: 'user_id' }).then(function(){});
+    }, { onConflict: 'user_id' }), 'plan');
   }
 
   function syncReminderSettings(){
-    if(!currentUserId) return;
-    supabase.from('user_settings').upsert({
+    if(!currentUserId) return Promise.resolve({});
+    return safe(supabase.from('user_settings').upsert({
       user_id: currentUserId,
       reminder_on: localStorage.getItem('pereselah_reminder_on') === 'on',
       reminder_time: localStorage.getItem('pereselah_reminder_time') || '07:00'
-    }, { onConflict: 'user_id' }).then(function(){});
+    }, { onConflict: 'user_id' }), 'reminder');
   }
 
   async function fetchAllUserData(){
@@ -750,7 +764,8 @@
     syncPlanState();
     todaysRef = computeTodaysRef();
     updatePlanDayLabel();
-    delete journal[key];
+    // Only clear today's cached verse so it refetches; keep any reflection already written.
+    if(journal[key]){ delete journal[key].verseRef; delete journal[key].verseText; }
     loadVerse();
   });
 
@@ -859,16 +874,26 @@
   }
   saveVerseBtn.addEventListener('click', function(){
     if(!currentVerseText) return;
-    var idx = faves.findIndex(function(f){ return f.ref === todaysRef; });
-    if(idx === -1){
-      faves.unshift({ ref: todaysRef, text: currentVerseText, savedAt: new Date().toISOString() });
-      syncSavedVerse(todaysRef, currentVerseText, true);
+    var ref = todaysRef, text = currentVerseText;
+    var idx = faves.findIndex(function(f){ return f.ref === ref; });
+    var adding = idx === -1;
+    var removed = null;
+    if(adding){
+      faves.unshift({ ref: ref, text: text, savedAt: new Date().toISOString() });
     } else {
-      faves.splice(idx, 1);
-      syncSavedVerse(todaysRef, currentVerseText, false);
+      removed = faves.splice(idx, 1)[0];
     }
     updateSaveBtn();
     renderFavorites();
+    syncSavedVerse(ref, text, adding).then(function(res){
+      if(res && res.error){
+        // Save failed: undo the change so the screen never claims something that isn't stored.
+        if(adding){ faves = faves.filter(function(f){ return f.ref !== ref; }); }
+        else if(removed){ faves.unshift(removed); }
+        updateSaveBtn();
+        renderFavorites();
+      }
+    });
   });
 
   document.getElementById('shareVerseBtn').addEventListener('click', function(){
@@ -1059,19 +1084,39 @@
 
   var reflectionInput = document.getElementById('reflectionInput');
 
-  document.getElementById('saveReflectionBtn').addEventListener('click', function(){
-    journal[key] = journal[key] || {};
-    journal[key].reflection = reflectionInput.value;
-    journal[key].verseRef = todaysRef;
-    journal[key].verseText = currentVerseText;
-    journal[key].date = key;
-    syncJournalToday();
-    renderStreak();
-    renderHistory();
-    var note = document.getElementById('savedNote');
-    note.classList.add('show');
-    setTimeout(function(){ note.classList.remove('show'); }, 2000);
-    checkCelebrations(computeStreak());
+  var savedNote = document.getElementById('savedNote');
+  var saveReflectionBtn = document.getElementById('saveReflectionBtn');
+  var noteTimer = null;
+  function showNote(msg, isError){
+    savedNote.textContent = msg;
+    savedNote.classList.toggle('err', !!isError);
+    savedNote.classList.add('show');
+    clearTimeout(noteTimer);
+    noteTimer = setTimeout(function(){ savedNote.classList.remove('show'); }, isError ? 4500 : 2000);
+  }
+
+  saveReflectionBtn.addEventListener('click', function(){
+    var entry = journal[key] = journal[key] || {};
+    var prev = { reflection: entry.reflection, verseRef: entry.verseRef, verseText: entry.verseText };
+    entry.reflection = reflectionInput.value;
+    entry.verseRef = todaysRef;
+    entry.verseText = currentVerseText;
+    entry.date = key;
+    saveReflectionBtn.disabled = true;
+    syncJournalToday(true).then(function(res){
+      saveReflectionBtn.disabled = false;
+      if(res && res.error){
+        entry.reflection = prev.reflection;
+        entry.verseRef = prev.verseRef;
+        entry.verseText = prev.verseText;
+        showNote('Not saved \u2014 check your connection and try again.', true);
+        return;
+      }
+      renderStreak();
+      renderHistory();
+      showNote('Saved', false);
+      checkCelebrations(computeStreak());
+    });
   });
 
   function renderHistory(){
@@ -1127,6 +1172,7 @@
   var journalOverlay = document.getElementById('journalOverlay');
   function openJournalOverlay(tab){
     journalOverlay.classList.remove('hidden');
+    profileCorner.classList.add('on-overlay');
     tabBtns.forEach(function(b){ b.classList.toggle('active', b.getAttribute('data-tab') === tab); });
     historyPanel.style.display = tab === 'history' ? 'block' : 'none';
     favoritesPanel.style.display = tab === 'favorites' ? 'block' : 'none';
@@ -1136,6 +1182,7 @@
   document.getElementById('openFavesBtn').addEventListener('click', function(){ openJournalOverlay('favorites'); });
   document.getElementById('journalBackBtn').addEventListener('click', function(){
     journalOverlay.classList.add('hidden');
+    profileCorner.classList.remove('on-overlay');
   });
 
   // ---- Celebration confetti ----
@@ -1209,6 +1256,9 @@
 
   supabase.auth.onAuthStateChange(function(event, session){
     if(session && session.user){
+      // Supabase can re-fire the signed-in event (e.g. when you return to the tab).
+      // Only run the full load when the signed-in user actually changes, so typed text isn't wiped.
+      var isNewUser = session.user.id !== currentUserId;
       currentUserId = session.user.id;
       currentUserEmail = session.user.email || '';
       authScreen.classList.add('hidden');
@@ -1216,10 +1266,22 @@
       profileCorner.classList.remove('hidden');
       avatarBtn.textContent = currentUserEmail.charAt(0).toUpperCase();
       avatarEmail.textContent = currentUserEmail;
-      fetchAllUserData().then(renderInitialState);
+      if(isNewUser){
+        fetchAllUserData().catch(function(err){ console.error('Pereselah load failed:', err); }).then(renderInitialState);
+      }
     } else {
       currentUserId = null;
       currentUserEmail = null;
+      // Clear the previous user's data so it can never flash for the next person.
+      journal = {};
+      faves = [];
+      planState = { id: 'random' };
+      currentVerseText = '';
+      reflectionInput.value = '';
+      verseLine.textContent = '';
+      verseRef.classList.remove('show');
+      journalOverlay.classList.add('hidden');
+      profileCorner.classList.remove('on-overlay');
       authScreen.classList.remove('hidden');
       appMain.classList.add('hidden');
       profileCorner.classList.add('hidden');
