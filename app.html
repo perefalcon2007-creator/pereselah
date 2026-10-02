@@ -1,0 +1,1625 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pereselah — Pause. Reflect. Return.</title>
+<meta name="theme-color" content="#3E2A10">
+<meta name="description" content="A quiet daily devotional. One verse, one reflection, every morning.">
+<meta property="og:type" content="website"><meta property="og:title" content="Pereselah — Pause. Reflect. Return.">
+<meta property="og:description" content="A quiet daily devotional. One verse, one reflection, every morning.">
+<meta property="og:image" content="icon-512.png"><meta name="twitter:card" content="summary">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icon-192.png" type="image/png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;600;700&family=Cinzel:wght@500;600&family=EB+Garamond:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+  *{ margin:0; padding:0; box-sizing:border-box; }
+  .hidden{ display:none !important; }
+  body{
+    background:
+      radial-gradient(ellipse at 20% 15%, rgba(140,110,60,0.08) 0%, transparent 45%),
+      radial-gradient(ellipse at 80% 85%, rgba(140,110,60,0.10) 0%, transparent 50%),
+      #DCCFA8;
+    color: #3E2A10; font-family: 'EB Garamond', serif; line-height: 1.6;
+  }
+  .cinzel{ font-family:'Cinzel',serif; }
+  .caveat{ font-family:'Caveat',cursive; }
+  .wrap{ max-width: 760px; margin: 0 auto; padding: 0 20px; }
+
+  header{ padding: 34px 20px 6px; text-align:center; }
+  .wordmark{ font-family:'Cinzel',serif; font-size: 17px; letter-spacing: 3px; color:#6B4E20; font-weight:600; }
+  .tagline{ font-size: 13px; color: #8A6E3A; font-style: italic; margin-top: 4px; }
+
+  .streak-row{ display:flex; justify-content:center; gap:10px; padding: 18px 20px 0; align-items:center; }
+  .controls-row{ display:flex; align-items:flex-start; justify-content:center; gap:18px; padding: 16px 20px 0; }
+  .tools-col{ display:flex; flex-direction:column; align-items:center; position:relative; }
+  .tools-label, .plan-choose-label{ font-size:10.5px; color:#8A6E3A; margin-top:6px; letter-spacing:0.4px; }
+  .plan-col{ display:flex; flex-direction:column; align-items:center; }
+  .plan-select{
+    background: rgba(255,250,235,0.6); border:1px solid #B89858; color:#3E2A10; font-size:13px;
+    padding: 8px 16px; border-radius: 20px; font-family:'EB Garamond',serif; cursor:pointer;
+  }
+  .plan-day-label{ text-align:center; font-size:11.5px; color:#8A6E3A; margin-top:8px; font-style:italic; }
+  .reminder-row{
+    display:flex; justify-content:center; align-items:center; gap:10px; padding: 14px 20px 0;
+  }
+  .reminder-toggle{
+    background:none; border:1px solid #B89858; color:#6B4E20; font-size:12px; padding:6px 14px;
+    border-radius:20px; cursor:pointer; font-family:'EB Garamond',serif;
+  }
+  .reminder-toggle.on{ background: rgba(198,154,72,0.25); }
+  .reminder-time{
+    border:1px solid #B89858; border-radius: 20px; padding:5px 10px; font-family:'EB Garamond',serif;
+    font-size:12px; color:#3E2A10; background: rgba(255,250,235,0.6);
+  }
+  .streak-badge{
+    display:flex; align-items:center; gap:6px; border: 1px solid #B89858; color:#6B4E20;
+    padding: 5px 14px; border-radius: 20px; font-size: 12.5px;
+  }
+  .date-label{ font-size: 12px; color: #8A6E3A; }
+
+  .scroll-wrap{ margin: 22px 0 0; }
+  .rod{
+    height: 20px; position: relative; z-index: 2; border-radius: 10px;
+    background: linear-gradient(180deg, #8A5A2E 0%, #6B4423 22%, #4A2E15 55%, #6B4423 80%, #8A5A2E 100%);
+    box-shadow: 0 6px 14px rgba(40,25,10,0.4), inset 0 1px 2px rgba(255,220,170,0.3);
+  }
+  .rod::before, .rod::after{
+    content:''; position:absolute; top: -5px; width: 22px; height: 30px; border-radius: 11px;
+    background: radial-gradient(circle at 35% 30%, #A8763E, #5C3A1C 70%, #3A2410);
+    box-shadow: 0 4px 8px rgba(30,18,8,0.5);
+  }
+  .rod::before{ left: -12px; }
+  .rod::after{ right: -12px; }
+  .parchment{
+    position: relative; margin: -2px 6px 0; padding: 40px 48px 34px;
+    background: linear-gradient(135deg, #F1E4C0 0%, #E9D9AC 50%, #EFE0B8 100%);
+    box-shadow:
+      inset 0 12px 20px -12px rgba(60,40,10,0.35), inset 0 -12px 20px -12px rgba(60,40,10,0.35),
+      inset 6px 0 14px -10px rgba(60,40,10,0.18), inset -6px 0 14px -10px rgba(60,40,10,0.18),
+      0 18px 44px -18px rgba(40,25,10,0.4);
+    text-align:center; z-index:1;
+  }
+  .verse-box{ min-height: 92px; display:flex; align-items:center; justify-content:center; }
+  .verse-line{ font-family:'Caveat',cursive; font-size: 26px; color:#3E2A10; line-height:1.55; max-width: 560px; }
+  .quill{ display:inline-block; margin-left:2px; animation: quillbob 0.5s ease-in-out infinite alternate; transform-origin: bottom left; }
+  @keyframes quillbob{ from{ transform: rotate(-6deg) translateY(0); } to{ transform: rotate(4deg) translateY(-2px); } }
+  .verse-ref{ margin-top:14px; font-style: italic; font-size: 13px; color:#8A6E3A; opacity:0; transition: opacity 0.6s ease; }
+  .verse-ref.show{ opacity:1; }
+  .verse-actions{ display:flex; justify-content:center; gap:10px; margin-top:18px; }
+  .verse-btn{
+    background:none; border:1px solid #B89858; color:#6B4E20; font-size:12px; padding:7px 14px;
+    border-radius: 20px; cursor:pointer; font-family:'EB Garamond',serif;
+  }
+  .verse-btn.saved{ background: rgba(198,154,72,0.2); }
+  .verse-btn.speaking{ background: rgba(198,154,72,0.3); }
+
+  .basket-btn{
+    background: rgba(255,250,235,0.85);
+    border:1px solid #B89858; width:38px; height:38px; border-radius:50%; font-size:17px;
+    cursor:pointer; display:flex; align-items:center; justify-content:center;
+  }
+  .basket-menu{
+    position:absolute; top:70px; left:0; z-index:6; background: linear-gradient(135deg,#F1E4C0,#E9D9AC);
+    border:1px solid #B89858; border-radius:10px; padding:6px; min-width:170px;
+    box-shadow: 0 14px 30px -12px rgba(40,25,10,0.4);
+  }
+  .basket-menu button{
+    display:flex; align-items:center; gap:8px; width:100%; text-align:left; background:none; border:none;
+    color:#3E2A10; font-size:13.5px; padding:9px 10px; border-radius:6px; cursor:pointer; font-family:'EB Garamond',serif;
+  }
+  .basket-menu button:hover{ background: rgba(184,152,88,0.2); }
+
+  .reflect-card{
+    margin: 20px 6px 0; background: linear-gradient(135deg,#F1E4C0,#E9D9AC); border-radius: 6px;
+    padding: 24px 26px; box-shadow: 0 12px 28px -16px rgba(40,25,10,0.35), inset 0 0 0 1px rgba(184,152,88,0.3);
+  }
+  .reflect-label{ font-family:'Cinzel',serif; font-size: 11px; letter-spacing:1.5px; color:#8A6E3A; margin-bottom: 10px; }
+  .reflect-prompt{ font-family:'Caveat',cursive; font-size: 18px; color:#3E2A10; margin-bottom: 14px; }
+  textarea#reflectionInput{
+    width:100%; min-height: 100px; border: 1px solid #C9AF75; border-radius: 4px; padding: 12px;
+    font-family: 'EB Garamond', serif; font-size: 15px; color:#3E2A10; background: rgba(255,250,235,0.5);
+    resize: vertical; outline:none;
+  }
+  textarea#reflectionInput:focus{ border-color: #6B4E20; }
+  .reflect-save-row{ display:flex; justify-content:space-between; align-items:center; margin-top:12px; }
+  .reflect-hint{ font-size: 11.5px; color: #8A6E3A; }
+  .reflect-save-btn{
+    background:#3E2A10; color:#F1E4C0; border:none; font-size:12.5px; padding:9px 18px;
+    border-radius: 20px; cursor:pointer; font-family:'EB Garamond',serif;
+  }
+  .saved-note{ font-size: 11.5px; color:#4F6B3E; opacity:0; transition: opacity 0.3s; }
+  .saved-note.show{ opacity:1; }
+  .saved-note.err{ color:#7A2E10; }
+
+  .tabs{ display:flex; gap:8px; margin: 26px 6px 0; }
+  .tab-btn{
+    flex:1; background: none; border: 1px solid #B89858; color:#6B4E20; font-size:12.5px; padding:9px;
+    border-radius: 20px; cursor:pointer; font-family:'EB Garamond',serif;
+  }
+  .tab-btn.active{ background:#3E2A10; color:#F1E4C0; border-color:#3E2A10; }
+
+  .journal-links{ display:flex; gap:10px; justify-content:center; margin: 22px 6px 30px; }
+  .journal-link-btn{
+    flex:1; background: linear-gradient(135deg,#F1E4C0,#E9D9AC); border:1px solid #B89858; color:#3E2A10;
+    font-size:13.5px; padding:12px; border-radius:8px; cursor:pointer; font-family:'EB Garamond',serif;
+    box-shadow: 0 8px 18px -12px rgba(40,25,10,0.3);
+  }
+  .journal-link-btn:hover{ background: linear-gradient(135deg,#E9D9AC,#F1E4C0); }
+
+  .journal-overlay{
+    position:fixed; inset:0; background:#DCCFA8; z-index:80; overflow-y:auto;
+  }
+  .journal-overlay-header{
+    display:flex; align-items:center; gap:14px; padding: 20px 20px 10px; position:sticky; top:0;
+    background:#DCCFA8; z-index:2;
+  }
+  .back-btn{
+    background: rgba(255,250,235,0.7); border:1px solid #B89858; color:#3E2A10; font-size:13px;
+    padding:8px 16px; border-radius:20px; cursor:pointer; font-family:'EB Garamond',serif;
+  }
+  .journal-overlay-title{ font-family:'Cinzel',serif; font-size:14px; letter-spacing:2px; color:#6B4E20; }
+
+  .history{ padding: 18px 6px 90px; }
+  .hist-empty{ text-align:center; color:#8A6E3A; padding: 36px 18px; font-size:14px; }
+  .hist-empty .caveat{ font-size: 19px; color: #3E2A10; margin-bottom:6px; display:block; }
+  .hist-item{
+    background: rgba(255,250,235,0.6); border: 1px solid #C9AF75; border-radius: 6px;
+    padding: 15px 16px; margin-bottom: 10px;
+  }
+  .hist-date{ font-size: 10.5px; color: #8A6E3A; margin-bottom: 6px; }
+  .hist-verse-ref{ font-size: 11.5px; color: #8A5A1E; margin-bottom: 4px; }
+  .hist-verse-text{ font-family:'Caveat',cursive; font-size: 16px; color: #6B5636; margin-bottom: 8px; }
+  .hist-reflection{ font-size: 14px; color: #3E2A10; white-space: pre-wrap; }
+
+  .fav-item{
+    background: rgba(255,250,235,0.6); border: 1px solid #C9AF75; border-radius: 6px;
+    padding: 15px 16px; margin-bottom: 10px;
+  }
+  .fav-ref{ font-size: 11.5px; color: #8A5A1E; margin-bottom: 6px; }
+  .fav-text{ font-family:'Caveat',cursive; font-size: 17px; }
+
+  footer{ text-align:center; padding: 20px 20px 40px; color: #8A6E3A; font-size: 11px; letter-spacing: 1px; }
+
+  /* AUTH SCREEN */
+  .auth-shell{ max-width: 380px; margin: 60px auto; padding: 0 24px; }
+  .auth-card{ background: linear-gradient(135deg,#F1E4C0,#E9D9AC); border: 1px solid #B89858; border-radius: 12px; padding: 28px 26px; }
+  .auth-title{ font-size: 20px; font-weight: 600; margin-bottom: 6px; }
+  .auth-sub{ font-size: 13.5px; color: #6B5636; margin-bottom: 22px; }
+  .field-label{ font-size: 12.5px; color: #6B5636; margin-bottom: 6px; display:block; }
+  .field{
+    width: 100%; border: 1px solid #B89858; border-radius: 8px; padding: 10px 12px;
+    font-family: 'EB Garamond', serif; font-size: 14.5px; background: rgba(255,250,235,0.6); margin-bottom: 14px; outline: none; color:#3E2A10;
+  }
+  .field:focus{ border-color: #3E2A10; }
+  .auth-btn{
+    width: 100%; background: #3E2A10; color: #F1E4C0; border: none;
+    font-size: 14px; font-weight: 500; padding: 11px; border-radius: 8px; cursor: pointer;
+    font-family: 'EB Garamond', serif; margin-top: 4px;
+  }
+  .auth-btn:disabled{ opacity: 0.5; cursor: default; }
+  .auth-switch{ text-align:center; font-size: 13px; color: #6B5636; margin-top: 16px; }
+  .auth-switch button{ background:none; border:none; color: #3E2A10; font-weight: 600; cursor:pointer; font-family: 'EB Garamond', serif; font-size: 13px; padding: 0; text-decoration: underline; }
+  .auth-error{ background: #F9D8CC; color: #7A2E10; font-size: 12.5px; padding: 9px 12px; border-radius: 6px; margin-bottom: 14px; }
+  .auth-note{ background: #EEDEB8; color: #6B4E1A; font-size: 12.5px; padding: 9px 12px; border-radius: 6px; margin-bottom: 14px; }
+
+  /* PROFILE CORNER */
+  .profile-corner{ position:absolute; top:30px; right:20px; z-index:90; }
+  .profile-corner.on-overlay{ top:22px; }
+  #avatarBtn{
+    width: 32px; height: 32px; border-radius: 50%; background: #3E2A10; color: #F1E4C0;
+    border: none; font-family: 'Cinzel', serif; font-size: 13px; font-weight: 600;
+    cursor:pointer; display:flex; align-items:center; justify-content:center;
+  }
+  .avatar-menu{
+    position:absolute; top: 40px; right: 0; background: linear-gradient(135deg,#F1E4C0,#E9D9AC); border: 1px solid #B89858;
+    border-radius: 10px; min-width: 190px; box-shadow: 0 12px 30px -10px rgba(40,25,10,0.3);
+    padding: 6px; z-index: 50;
+  }
+  .avatar-email{
+    font-size: 11.5px; color: #6B5636; padding: 8px 10px; border-bottom: 1px solid #C9AF75;
+    margin-bottom: 4px; word-break: break-all;
+  }
+  .avatar-menu button{
+    display:block; width:100%; text-align:left; background:none; border:none; color: #3E2A10;
+    font-size: 13px; padding: 8px 10px; border-radius: 6px; cursor:pointer; font-family: 'EB Garamond', serif;
+  }
+  .avatar-menu button:hover{ background: rgba(184,152,88,0.2); }
+
+  @media (max-width: 480px){
+    .parchment{ padding: 32px 24px 26px; }
+    .verse-line{ font-size: 21px; }
+  }
+  .forgot{ display:block; text-align:right; font-size:12.5px; color:#3E2A10; margin:-6px 0 8px; }
+  .jtools{ display:flex; gap:8px; margin:14px 6px 0; }
+  .jtools input{ flex:1; border:1px solid #B89858; border-radius:20px; padding:8px 14px; font-family:'EB Garamond',serif; font-size:14px; background:rgba(255,250,235,0.6); color:#3E2A10; outline:none; }
+  .jtools button{ background:none; border:1px solid #B89858; color:#6B4E20; border-radius:20px; padding:8px 16px; font-family:'EB Garamond',serif; font-size:13px; cursor:pointer; }
+  .cal-head{ display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; font-family:'Cinzel',serif; font-size:14px; letter-spacing:1px; }
+  .cal-head button{ background:none; border:1px solid #B89858; border-radius:50%; width:32px; height:32px; font-size:16px; color:#3E2A10; cursor:pointer; }
+  .cal-grid{ display:grid; grid-template-columns:repeat(7,1fr); gap:6px; text-align:center; }
+  .cal-grid b{ font-size:11px; color:#8A6E3A; font-weight:500; }
+  .cal-grid i{ font-style:normal; font-size:13px; padding:8px 0; border-radius:50%; }
+  .cal-grid i.on{ background:#3E2A10; color:#F1E4C0; } .cal-grid i.today{ box-shadow:0 0 0 2px #C69A48; }
+  .cal-note{ text-align:center; margin-top:16px; font-size:13px; color:#8A6E3A; font-style:italic; }
+  html.dark{ filter:invert(.92) hue-rotate(180deg); background:#111; }
+  .oauth-btn{ width:100%; display:flex; align-items:center; justify-content:center; gap:10px; background:#fff; color:#3E2A10;
+    border:1px solid #B89858; border-radius:8px; padding:10px; font-family:'EB Garamond',serif; font-size:14px; cursor:pointer; margin-bottom:14px; }
+  .oauth-btn:disabled{ opacity:0.6; cursor:default; }
+  .divider{ display:flex; align-items:center; gap:10px; margin:2px 0 14px; font-size:12px; color:#8A6E3A; }
+  .divider::before,.divider::after{ content:''; flex:1; height:1px; background:#C9AF75; }
+  .avatar-menu button.danger{ color:#7A2E10; border-top:1px solid #C9AF75; margin-top:4px; padding-top:10px; }
+  .legal{ margin-top:10px; font-size:11px; }
+  .legal a{ text-decoration:underline; color:inherit; }
+  .install-btn{ position:absolute; top:30px; left:20px; z-index:90; background:rgba(255,250,235,0.85);
+    border:1px solid #B89858; border-radius:20px; padding:7px 16px; font-family:'EB Garamond',serif;
+    font-size:13px; color:#3E2A10; cursor:pointer; }
+  .install-btn:hover{ background:rgba(255,250,235,1); }
+  .install-btn:disabled{ opacity:0.6; cursor:default; }
+  .guest-link{ display:block; text-align:center; font-size:12.5px; color:#6B5636; margin-top:14px; text-decoration:underline; cursor:pointer; background:none; border:none; width:100%; font-family:'EB Garamond',serif; }
+  .guest-badge{ position:absolute; top:30px; right:20px; z-index:90; display:flex; align-items:center; gap:8px;
+    background:rgba(255,250,235,0.85); border:1px solid #B89858; border-radius:20px; padding:6px 8px 6px 14px; font-size:12.5px; color:#6B5636; }
+  .guest-badge button{ background:#3E2A10; color:#F1E4C0; border:none; border-radius:16px; padding:6px 12px; font-size:12px; cursor:pointer; font-family:'EB Garamond',serif; }
+</style>
+</head>
+<body>
+
+<header style="position:relative;">
+  <div class="wordmark">PERESELAH</div>
+  <div class="tagline">Pause. Reflect. Return.</div>
+  <button id="installBtn" class="install-btn hidden">⤓ Install</button>
+  <div class="guest-badge hidden" id="guestBadge"><span>Guest mode</span><button id="guestSignupBtn">Sign up</button></div>
+  <div class="profile-corner hidden" id="profileCorner">
+    <button id="avatarBtn"></button>
+    <div class="avatar-menu hidden" id="avatarMenu">
+      <div class="avatar-email" id="avatarEmail"></div>
+      <button id="themeBtn">Dark mode</button>
+      <button id="signOutBtn">Sign out</button>
+      <button id="deleteAccountBtn" class="danger">Delete account</button>
+    </div>
+  </div>
+</header>
+
+<div id="authScreen" class="auth-shell">
+  <div class="auth-card">
+    <div class="auth-title" id="authTitle">Welcome back</div>
+    <div class="auth-sub" id="authSub">Sign in to see your journal.</div>
+    <div id="authError" class="auth-error hidden"></div>
+    <div id="authNote" class="auth-note hidden"></div>
+    <button type="button" id="googleBtn" class="oauth-btn">
+      <svg width="17" height="17" viewBox="0 0 48 48"><path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3C33.7 32.4 29.3 35 24 35c-6.1 0-11.3-4.1-12.9-9.7l-6.6 5.1C7.6 37.7 15.1 43 24 43c10.5 0 19-8.5 19-19 0-1.2-.1-2.4-.4-3.5z"/><path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.6 15.6 18.9 13 24 13c3.1 0 5.9 1.1 8.1 3l6-6C34.6 6.5 29.6 4.5 24 4.5c-7.7 0-14.4 4.4-17.7 10.2z"/><path fill="#4CAF50" d="M24 43.5c5.5 0 10.4-1.9 14.1-5.1l-6.5-5.4C29.5 34.6 26.9 35.5 24 35.5c-5.3 0-9.8-3.5-11.3-8.4l-6.6 5.1C9.5 39 16.2 43.5 24 43.5z"/><path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.3-2.2 4.3-4.1 5.8l6.5 5.4C41.5 35.6 43 30.3 43 24c0-1.2-.1-2.4-.4-3.5z"/></svg>
+      Continue with Google
+    </button>
+    <div class="divider" id="authDivider">or</div>
+    <label class="field-label" id="emailLabel">Email</label>
+    <input id="authEmail" class="field" type="email" placeholder="you@example.com" autocomplete="email">
+    <label class="field-label">Password</label>
+    <input id="authPassword" class="field" type="password" placeholder="At least 6 characters" autocomplete="current-password">
+    <a href="#" id="forgotLink" class="forgot">Forgot password?</a>
+    <button id="authSubmit" class="auth-btn">Sign in</button>
+    <div class="auth-switch" id="authSwitchRow">
+      <span id="authSwitchText">Don't have an account?</span>
+      <button id="authSwitchBtn">Sign up</button>
+    </div>
+    <button type="button" id="guestLink" class="guest-link">Try it without signing up</button>
+  </div>
+</div>
+
+<div id="appMain" class="hidden">
+
+<div class="streak-row">
+  <span class="streak-badge">🔥 <span id="streakCount">0</span> day streak</span>
+  <span class="date-label" id="todayLabel"></span>
+</div>
+
+<div class="controls-row">
+  <div class="tools-col">
+    <button class="basket-btn" id="basketBtn" aria-label="Verse actions" title="Verse actions">🧺</button>
+    <div class="tools-label">Tools</div>
+    <div class="basket-menu hidden" id="basketMenu">
+      <button id="replayBtn">✒ Rewrite</button>
+      <button id="saveVerseBtn">♡ Save</button>
+      <button id="shareVerseBtn">Copy text</button>
+      <button id="downloadVerseBtn">⬇ Download</button>
+      <button id="listenBtn">🔊 Listen</button>
+      <button id="shareWaBtn">↗ Share</button>
+    </div>
+  </div>
+  <div class="plan-col">
+    <select class="plan-select" id="planSelect">
+      <option value="random">Random verse</option>
+      <option value="peace">Peace (7 days)</option>
+      <option value="faith">Faith (7 days)</option>
+      <option value="strength">Strength (7 days)</option>
+      <option value="love">Love (7 days)</option>
+      <option value="hope">Hope (7 days)</option>
+      <option value="gratitude">Gratitude (7 days)</option>
+      <option value="wisdom">Wisdom (7 days)</option>
+      <option value="comfort">Comfort (7 days)</option>
+      <option value="revelation">Revelation (7 days)</option>
+      <option value="forgiveness">Forgiveness (7 days)</option>
+      <option value="joy">Joy (7 days)</option>
+    </select>
+    <div class="plan-choose-label">Choose your reading plan</div>
+  </div>
+</div>
+<div class="plan-day-label" id="planDayLabel"></div>
+
+<div class="reminder-row">
+  <button class="reminder-toggle" id="reminderToggle">🔔 Daily reminder</button>
+  <input type="time" class="reminder-time" id="reminderTime" value="07:00">
+</div>
+
+<div class="wrap">
+  <div class="scroll-wrap">
+    <div class="rod"></div>
+    <div class="parchment">
+      <div class="verse-box">
+        <div class="verse-line" id="verseLine"></div>
+      </div>
+      <div class="verse-ref" id="verseRef"></div>
+    </div>
+    <div class="rod"></div>
+  </div>
+
+  <div class="reflect-card">
+    <div class="reflect-label">TODAY'S REFLECTION</div>
+    <div class="reflect-prompt" id="reflectPrompt">What does this verse mean for you today?</div>
+    <textarea id="reflectionInput" placeholder="Write a few thoughts..."></textarea>
+    <div class="reflect-save-row">
+      <span class="saved-note" id="savedNote">Saved</span>
+      <button class="reflect-save-btn" id="saveReflectionBtn">Save reflection</button>
+    </div>
+  </div>
+
+  <div class="journal-links">
+    <button class="journal-link-btn" id="openJournalBtn">📖 Journal</button>
+    <button class="journal-link-btn" id="openFavesBtn">♡ Saved verses</button>
+  </div>
+</div>
+
+<div class="journal-overlay hidden" id="journalOverlay">
+  <div class="journal-overlay-header">
+    <button class="back-btn" id="journalBackBtn">← Back</button>
+    <div class="journal-overlay-title">PERESELAH</div>
+  </div>
+  <div class="wrap">
+    <div class="tabs">
+      <button class="tab-btn active" data-tab="history">Journal</button>
+      <button class="tab-btn" data-tab="favorites">Saved verses</button>
+      <button class="tab-btn" data-tab="calendar">Calendar</button>
+    </div>
+    <div class="jtools" id="jTools"><input id="jSearch" type="search" placeholder="Search your journal"><button id="jExport">Export</button></div>
+    <div class="history" id="historyPanel"></div>
+    <div class="history" id="favoritesPanel" style="display:none;"></div>
+    <div class="history" id="calendarPanel" style="display:none;"></div>
+  </div>
+</div>
+
+</div>
+
+<footer>
+  <div>PERESELAH · MADE FOR QUIET MORNINGS</div>
+  <div id="creditLine" style="margin-top:6px;">Made by PereFalc</div>
+  <div class="legal"><a href="privacy.html">Privacy Policy</a></div>
+  <div style="margin-top:4px;">© 2026 Pereselah</div>
+</footer>
+
+<svg width="0" height="0" style="position:absolute">
+  <symbol id="quillIcon" viewBox="0 0 24 24">
+    <path d="M20 4 C14 5 6 12 3 20 L5 22 C13 19 20 11 21 5 Z" fill="#3E2A10"/>
+    <path d="M3 20 L1 23" stroke="#3E2A10" stroke-width="1.5" stroke-linecap="round"/>
+  </symbol>
+</svg>
+
+<script>
+(function(){
+  var user = 'perefalcon2007';
+  var domain = 'yahoo.com';
+  var address = user + '@' + domain;
+  var el = document.getElementById('creditLine');
+  el.innerHTML = 'Made by PereFalc \u00b7 <a href="mailto:' + address + '" style="text-decoration:underline;color:inherit;">' + address + '</a>';
+})();
+</script>
+
+<script>
+  if('serviceWorker' in navigator){
+    window.addEventListener('load', function(){
+      navigator.serviceWorker.register('sw.js').then(function(reg){
+        // When a new sw.js ships (a bumped CACHE_VERSION), take over immediately and
+        // reload once, so people see the update without having to clear their cache by hand.
+        reg.addEventListener('updatefound', function(){
+          var installing = reg.installing;
+          if(!installing) return;
+          installing.addEventListener('statechange', function(){
+            if(installing.state === 'installed' && navigator.serviceWorker.controller){
+              installing.postMessage('skipWaiting');
+            }
+          });
+        });
+      }).catch(function(err){ console.log('SW registration failed', err); });
+      var reloaded = false;
+      navigator.serviceWorker.addEventListener('controllerchange', function(){
+        if(reloaded) return;
+        reloaded = true;
+        window.location.reload();
+      });
+    });
+  }
+</script>
+
+<script>
+(function(){
+  var SUPABASE_URL = 'https://wnngtfoimuzbekxfxxwv.supabase.co';
+  var SUPABASE_KEY = 'sb_publishable_LgpkkeX7p-Sz_qJXi256Xg_iQQmQ56V';
+  var supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+  var currentUserId = null;
+  var currentUserEmail = null;
+
+  // ONLINE pool — 120 references, text fetched live from the API when a connection is available
+  var VERSE_LIST = [
+    'John 3:16','Psalm 23:1','Proverbs 3:5-6','Philippians 4:13','Romans 8:28',
+    'Jeremiah 29:11','Isaiah 41:10','Psalm 46:1','Matthew 6:33','Joshua 1:9',
+    'Psalm 121:1-2','2 Corinthians 5:17','Galatians 5:22-23','Psalm 37:4',
+    'Proverbs 16:3','1 Peter 5:7','Psalm 27:1','Matthew 11:28','Psalm 34:18',
+    'Isaiah 40:31','Psalm 118:24','Lamentations 3:22-23','Psalm 91:1-2','Philippians 4:6-7',
+    'Psalm 139:14','Hebrews 11:1','James 1:2-4','Psalm 16:11','2 Timothy 1:7',
+    'Psalm 143:8','Proverbs 18:10','Romans 12:2','Psalm 30:5','Colossians 3:23',
+    'Psalm 100:4-5','1 Corinthians 13:4-7','Psalm 55:22','Ephesians 2:8-9','Psalm 73:26',
+    'Psalm 46:10','Genesis 1:1','Exodus 14:14','Deuteronomy 31:6','Deuteronomy 31:8',
+    '1 Samuel 16:7','1 Chronicles 16:11','Nehemiah 8:10','Job 19:25','Psalm 1:1-3',
+    'Psalm 4:8','Psalm 5:3','Psalm 8:3-4','Psalm 9:9-10','Psalm 18:2',
+    'Psalm 19:14','Psalm 25:4-5','Psalm 28:7','Psalm 31:24','Psalm 32:8',
+    'Psalm 34:8','Psalm 42:1','Psalm 51:10','Psalm 56:3','Psalm 62:1-2',
+    'Psalm 84:11','Psalm 86:5','Psalm 90:12','Psalm 94:19','Psalm 103:1-5',
+    'Psalm 107:1','Psalm 112:7','Psalm 119:105','Psalm 126:5','Psalm 138:8',
+    'Psalm 147:3','Proverbs 1:7','Proverbs 4:23','Proverbs 11:25','Proverbs 15:1',
+    'Proverbs 17:17','Proverbs 22:6','Proverbs 27:17','Proverbs 31:25','Ecclesiastes 3:1',
+    'Ecclesiastes 4:9-10','Isaiah 26:3','Isaiah 30:21','Isaiah 43:2','Isaiah 53:5',
+    'Isaiah 55:8-9','Isaiah 58:11','Isaiah 64:8','Jeremiah 17:7-8','Jeremiah 31:3',
+    'Lamentations 3:25','Ezekiel 36:26','Micah 6:8','Habakkuk 3:19','Zephaniah 3:17',
+    'Malachi 3:10','Matthew 5:14-16','Matthew 6:34','Matthew 7:7','Matthew 19:26',
+    'Mark 9:23','Mark 11:24','Mark 12:30-31','Luke 1:37','Luke 6:31',
+    'Luke 11:9-10','John 1:1','John 8:32','John 10:10','John 13:34-35',
+    'John 14:6','John 14:27','John 15:5','John 15:13','John 16:33',
+    'Acts 1:8','Romans 5:8','Romans 6:23','Romans 10:9-10','Romans 12:12',
+    'Romans 15:13','1 Corinthians 10:13','1 Corinthians 15:58','1 Corinthians 16:14','2 Corinthians 4:16-18',
+    '2 Corinthians 9:6-7','2 Corinthians 12:9','Galatians 2:20','Galatians 6:9','Ephesians 3:20',
+    'Ephesians 4:32','Philippians 1:6','Philippians 2:3-4','Philippians 4:8','Philippians 4:19',
+    'Colossians 3:2','1 Thessalonians 5:16-18','1 Timothy 4:12','2 Timothy 3:16-17','2 Timothy 4:7',
+    'Hebrews 4:16','Hebrews 12:1-2','Hebrews 13:5-6','James 1:5','James 1:12',
+    'James 4:7-8','1 Peter 1:3','1 Peter 2:9','1 Peter 3:15','1 Peter 4:8',
+    '1 John 1:9','1 John 4:7-8','1 John 4:18','1 John 5:14','Revelation 3:20','Revelation 21:4',
+    'Numbers 6:24-26','Deuteronomy 6:5','1 Samuel 17:47','2 Samuel 22:31','2 Chronicles 7:14',
+    'Nehemiah 4:14','Esther 4:14','Job 1:21','Job 42:2','Psalm 2:11',
+    'Psalm 33:11','Psalm 40:1-3','Psalm 61:2','Psalm 63:1','Psalm 68:19',
+    'Psalm 71:5','Psalm 77:11','Psalm 84:10','Psalm 89:1','Psalm 96:1',
+    'Psalm 105:4','Psalm 111:10','Psalm 116:1-2','Psalm 130:5','Psalm 133:1',
+    'Psalm 145:18','Proverbs 2:6','Proverbs 10:12','Proverbs 12:25','Proverbs 13:20',
+    'Proverbs 19:21','Proverbs 21:1','Proverbs 29:18','Isaiah 1:18','Isaiah 12:2',
+    'Isaiah 25:1','Isaiah 30:15','Isaiah 49:15-16','Isaiah 61:1','Jeremiah 1:5',
+    'Hosea 6:3','Revelation 1:8','Revelation 21:5','Revelation 22:13','Revelation 3:11',
+    'Revelation 12:11','Matthew 6:14-15','Colossians 3:13','Mark 11:25','Luke 6:37',
+    'Psalm 103:12','John 15:11','Philippians 4:4'
+  ];
+
+  // OFFLINE fallback — 40 verses with the actual KJV text built in, used when the API can't be reached
+  var OFFLINE_VERSES = [
+    { ref: 'John 3:16', text: 'For God so loved the world, that he gave his only begotten Son, that whosoever believeth in him should not perish, but have everlasting life.' },
+    { ref: 'Psalm 23:1', text: 'The LORD is my shepherd; I shall not want.' },
+    { ref: 'Philippians 4:13', text: 'I can do all things through Christ which strengtheneth me.' },
+    { ref: 'Romans 8:28', text: 'And we know that all things work together for good to them that love God, to them who are the called according to his purpose.' },
+    { ref: 'Jeremiah 29:11', text: 'For I know the thoughts that I think toward you, saith the LORD, thoughts of peace, and not of evil, to give you an expected end.' },
+    { ref: 'Proverbs 3:5-6', text: 'Trust in the LORD with all thine heart; and lean not unto thine own understanding. In all thy ways acknowledge him, and he shall direct thy paths.' },
+    { ref: 'Isaiah 41:10', text: 'Fear thou not; for I am with thee: be not dismayed; for I am thy God: I will strengthen thee; yea, I will help thee; yea, I will uphold thee with the right hand of my righteousness.' },
+    { ref: 'Psalm 46:1', text: 'God is our refuge and strength, a very present help in trouble.' },
+    { ref: 'Matthew 6:33', text: 'But seek ye first the kingdom of God, and his righteousness; and all these things shall be added unto you.' },
+    { ref: 'Joshua 1:9', text: 'Have not I commanded thee? Be strong and of a good courage; be not afraid, neither be thou dismayed: for the LORD thy God is with thee whithersoever thou goest.' },
+    { ref: 'Psalm 121:1-2', text: 'I will lift up mine eyes unto the hills, from whence cometh my help. My help cometh from the LORD, which made heaven and earth.' },
+    { ref: '2 Corinthians 5:17', text: 'Therefore if any man be in Christ, he is a new creature: old things are passed away; behold, all things are become new.' },
+    { ref: 'Galatians 5:22-23', text: 'But the fruit of the Spirit is love, joy, peace, longsuffering, gentleness, goodness, faith, meekness, temperance: against such there is no law.' },
+    { ref: 'Psalm 37:4', text: 'Delight thyself also in the LORD: and he shall give thee the desires of thine heart.' },
+    { ref: 'Proverbs 16:3', text: 'Commit thy works unto the LORD, and thy thoughts shall be established.' },
+    { ref: '1 Peter 5:7', text: 'Casting all your care upon him; for he careth for you.' },
+    { ref: 'Psalm 27:1', text: 'The LORD is my light and my salvation; whom shall I fear? the LORD is the strength of my life; of whom shall I be afraid?' },
+    { ref: 'Matthew 11:28', text: 'Come unto me, all ye that labour and are heavy laden, and I will give you rest.' },
+    { ref: 'Psalm 34:18', text: 'The LORD is nigh unto them that are of a broken heart; and saveth such as be of a contrite spirit.' },
+    { ref: 'Isaiah 40:31', text: 'But they that wait upon the LORD shall renew their strength; they shall mount up with wings as eagles; they shall run, and not be weary; and they shall walk, and not faint.' },
+    { ref: 'Psalm 118:24', text: 'This is the day which the LORD hath made; we will rejoice and be glad in it.' },
+    { ref: 'Lamentations 3:22-23', text: 'It is of the LORD\u2019s mercies that we are not consumed, because his compassions fail not. They are new every morning: great is thy faithfulness.' },
+    { ref: 'Psalm 91:1-2', text: 'He that dwelleth in the secret place of the most High shall abide under the shadow of the Almighty. I will say of the LORD, He is my refuge and my fortress: my God; in him will I trust.' },
+    { ref: 'Philippians 4:6-7', text: 'Be careful for nothing; but in every thing by prayer and supplication with thanksgiving let your requests be made known unto God. And the peace of God, which passeth all understanding, shall keep your hearts and minds through Christ Jesus.' },
+    { ref: 'Psalm 139:14', text: 'I will praise thee; for I am fearfully and wonderfully made: marvellous are thy works; and that my soul knoweth right well.' },
+    { ref: 'Hebrews 11:1', text: 'Now faith is the substance of things hoped for, the evidence of things not seen.' },
+    { ref: 'James 1:2-4', text: 'My brethren, count it all joy when ye fall into divers temptations; knowing this, that the trying of your faith worketh patience. But let patience have her perfect work, that ye may be perfect and entire, wanting nothing.' },
+    { ref: 'Psalm 16:11', text: 'Thou wilt shew me the path of life: in thy presence is fulness of joy; at thy right hand there are pleasures for evermore.' },
+    { ref: '2 Timothy 1:7', text: 'For God hath not given us the spirit of fear; but of power, and of love, and of a sound mind.' },
+    { ref: 'Psalm 143:8', text: 'Cause me to hear thy lovingkindness in the morning; for in thee do I trust: cause me to know the way wherein I should walk; for I lift up my soul unto thee.' },
+    { ref: 'Proverbs 18:10', text: 'The name of the LORD is a strong tower: the righteous runneth into it, and is safe.' },
+    { ref: 'Romans 12:2', text: 'And be not conformed to this world: but be ye transformed by the renewing of your mind, that ye may prove what is that good, and acceptable, and perfect, will of God.' },
+    { ref: 'Psalm 30:5', text: 'For his anger endureth but a moment; in his favour is life: weeping may endure for a night, but joy cometh in the morning.' },
+    { ref: 'Colossians 3:23', text: 'And whatsoever ye do, do it heartily, as to the Lord, and not unto men.' },
+    { ref: 'Psalm 100:4-5', text: 'Enter into his gates with thanksgiving, and into his courts with praise: be thankful unto him, and bless his name. For the LORD is good; his mercy is everlasting; and his truth endureth to all generations.' },
+    { ref: '1 Corinthians 13:4-7', text: 'Charity suffereth long, and is kind; charity envieth not; charity vaunteth not itself, is not puffed up, doth not behave itself unseemly, seeketh not her own, is not easily provoked, thinketh no evil; rejoiceth not in iniquity, but rejoiceth in the truth; beareth all things, believeth all things, hopeth all things, endureth all things.' },
+    { ref: 'Psalm 55:22', text: 'Cast thy burden upon the LORD, and he shall sustain thee: he shall never suffer the righteous to be moved.' },
+    { ref: 'Ephesians 2:8-9', text: 'For by grace are ye saved through faith; and that not of yourselves: it is the gift of God: not of works, lest any man should boast.' },
+    { ref: 'Psalm 73:26', text: 'My flesh and my heart faileth: but God is the strength of my heart, and my portion for ever.' },
+    { ref: 'Psalm 46:10', text: 'Be still, and know that I am God: I will be exalted among the heathen, I will be exalted in the earth.' },
+    { ref: 'Isaiah 26:3', text: 'Thou wilt keep him in perfect peace, whose mind is stayed on thee: because he trusteth in thee.' },
+    { ref: 'John 14:27', text: 'Peace I leave with you, my peace I give unto you: not as the world giveth, give I unto you. Let not your heart be troubled, neither let it be afraid.' },
+    { ref: 'Psalm 4:8', text: 'I will both lay me down in peace, and sleep: for thou, LORD, only makest me dwell in safety.' },
+    { ref: 'Mark 11:24', text: 'Therefore I say unto you, What things soever ye desire, when ye pray, believe that ye receive them, and ye shall have them.' },
+    { ref: 'Mark 9:23', text: 'Jesus said unto him, If thou canst believe, all things are possible to him that believeth.' },
+    { ref: 'Romans 10:9-10', text: 'That if thou shalt confess with thy mouth the Lord Jesus, and shalt believe in thine heart that God hath raised him from the dead, thou shalt be saved. For with the heart man believeth unto righteousness; and with the mouth confession is made unto salvation.' },
+    { ref: 'Luke 1:37', text: 'For with God nothing shall be impossible.' },
+    { ref: 'Habakkuk 3:19', text: 'The LORD God is my strength, and he will make my feet like hinds\u2019 feet, and he will make me to walk upon mine high places.' },
+    { ref: 'Romans 5:8', text: 'But God commendeth his love toward us, in that, while we were yet sinners, Christ died for us.' },
+    { ref: 'Ephesians 4:32', text: 'And be ye kind one to another, tenderhearted, forgiving one another, even as God for Christ\u2019s sake hath forgiven you.' },
+    { ref: '1 John 4:7-8', text: 'Beloved, let us love one another: for love is of God; and every one that loveth is born of God, and knoweth God. He that loveth not knoweth not God; for God is love.' },
+    { ref: '1 John 4:18', text: 'There is no fear in love; but perfect love casteth out fear: because fear hath torment. He that feareth is not made perfect in love.' },
+    { ref: 'John 15:13', text: 'Greater love hath no man than this, that a man lay down his life for his friends.' },
+    { ref: 'Romans 15:13', text: 'Now the God of hope fill you with all joy and peace in believing, that ye may abound in hope, through the power of the Holy Ghost.' },
+    { ref: 'Psalm 42:1', text: 'As the hart panteth after the water brooks, so panteth my soul after thee, O God.' },
+    { ref: '1 Thessalonians 5:16-18', text: 'Rejoice evermore. Pray without ceasing. In every thing give thanks: for this is the will of God in Christ Jesus concerning you.' },
+    { ref: 'James 1:5', text: 'If any of you lack wisdom, let him ask of God, that giveth to all men liberally, and upbraideth not; and it shall be given him.' },
+    { ref: 'Proverbs 27:17', text: 'Iron sharpeneth iron; so a man sharpeneth the countenance of his friend.' },
+    { ref: 'Psalm 119:105', text: 'Thy word is a lamp unto my feet, and a light unto my path.' },
+    { ref: '2 Corinthians 4:16-18', text: 'For which cause we faint not; but though our outward man perish, yet the inward man is renewed day by day. For our light affliction, which is but for a moment, worketh for us a far more exceeding and eternal weight of glory; while we look not at the things which are seen, but at the things which are not seen: for the things which are seen are temporal; but the things which are not seen are eternal.' },
+    { ref: 'Matthew 6:14-15', text: 'For if ye forgive men their trespasses, your heavenly Father will also forgive you: but if ye forgive not men their trespasses, neither will your Father forgive your trespasses.' },
+    { ref: 'Colossians 3:13', text: 'Forbearing one another, and forgiving one another, if any man have a quarrel against any: even as Christ forgave you, so also do ye.' },
+    { ref: 'Mark 11:25', text: 'And when ye stand praying, forgive, if ye have ought against any: that your Father also which is in heaven may forgive you your trespasses.' },
+    { ref: 'Luke 6:37', text: 'Judge not, and ye shall not be judged: condemn not, and ye shall not be condemned: forgive, and ye shall be forgiven.' },
+    { ref: 'Psalm 103:12', text: 'As far as the east is from the west, so far hath he removed our transgressions from us.' },
+    { ref: 'John 15:11', text: 'These things have I spoken unto you, that my joy might remain in you, and that your joy might be full.' },
+    { ref: 'Philippians 4:4', text: 'Rejoice in the Lord alway: and again I say, Rejoice.' },
+    { ref: 'Revelation 1:8', text: 'I am Alpha and Omega, the beginning and the ending, saith the Lord, which is, and which was, and which is to come, the Almighty.' },
+    { ref: 'Revelation 21:5', text: 'And he that sat upon the throne said, Behold, I make all things new. And he said unto me, Write: for these words are true and faithful.' },
+    { ref: 'Revelation 22:13', text: 'I am Alpha and Omega, the beginning and the end, the first and the last.' },
+    { ref: 'Revelation 3:11', text: 'Behold, I come quickly: hold that fast which thou hast, that no man take thy crown.' },
+    { ref: 'Revelation 12:11', text: 'And they overcame him by the blood of the Lamb, and by the word of their testimony; and they loved not their lives unto the death.' },
+    { ref: 'Psalm 119:11', text: 'Thy word have I hid in mine heart, that I might not sin against thee.' },
+    { ref: 'Isaiah 9:6', text: 'For unto us a child is born, unto us a son is given: and the government shall be upon his shoulder: and his name shall be called Wonderful, Counsellor, The mighty God, The everlasting Father, The Prince of Peace.' },
+    { ref: 'Isaiah 43:18-19', text: 'Remember ye not the former things, neither consider the things of old. Behold, I will do a new thing; now it shall spring forth; shall ye not know it? I will even make a way in the wilderness, and rivers in the desert.' },
+    { ref: 'Isaiah 54:17', text: 'No weapon that is formed against thee shall prosper; and every tongue that shall rise against thee in judgment thou shalt condemn. This is the heritage of the servants of the LORD, and their righteousness is of me, saith the LORD.' },
+    { ref: 'Jeremiah 33:3', text: 'Call unto me, and I will answer thee, and shew thee great and mighty things, which thou knowest not.' },
+    { ref: 'Zechariah 4:6', text: 'This is the word of the LORD unto Zerubbabel, saying, Not by might, nor by power, but by my spirit, saith the LORD of hosts.' },
+    { ref: 'Matthew 6:26', text: 'Behold the fowls of the air: for they sow not, neither do they reap, nor gather into barns; yet your heavenly Father feedeth them. Are ye not much better than they?' },
+    { ref: 'Matthew 28:6', text: 'He is not here: for he is risen, as he said. Come, see the place where the Lord lay.' },
+    { ref: 'John 11:25-26', text: 'Jesus said unto her, I am the resurrection, and the life: he that believeth in me, though he were dead, yet shall he live: and whosoever liveth and believeth in me shall never die. Believest thou this?' },
+    { ref: 'Romans 8:1', text: 'There is therefore now no condemnation to them which are in Christ Jesus, who walk not after the flesh, but after the Spirit.' },
+    { ref: 'Romans 8:38-39', text: 'For I am persuaded, that neither death, nor life, nor angels, nor principalities, nor powers, nor things present, nor things to come, nor height, nor depth, nor any other creature, shall be able to separate us from the love of God, which is in Christ Jesus our Lord.' },
+    { ref: '1 Corinthians 15:57', text: 'But thanks be to God, which giveth us the victory through our Lord Jesus Christ.' },
+    { ref: '2 Corinthians 5:7', text: 'For we walk by faith, not by sight.' },
+    { ref: 'Ephesians 2:10', text: 'For we are his workmanship, created in Christ Jesus unto good works, which God hath before ordained that we should walk in them.' },
+    { ref: 'Hebrews 13:8', text: 'Jesus Christ the same yesterday, and to day, and for ever.' },
+    { ref: 'Revelation 3:20', text: 'Behold, I stand at the door, and knock: if any man hear my voice, and open the door, I will come in to him, and will sup with him, and he with me.' },
+    { ref: 'Revelation 21:4', text: 'And God shall wipe away all tears from their eyes; and there shall be no more death, neither sorrow, nor crying, neither shall there be any more pain: for the former things are passed away.' },
+    { ref: '1 John 1:9', text: 'If we confess our sins, he is faithful and just to forgive us our sins, and to cleanse us from all unrighteousness.' },
+    { ref: 'Nehemiah 8:10', text: 'Then he said unto them, Go your way, eat the fat, and drink the sweet, and send portions unto them for whom nothing is prepared: for this day is holy unto our Lord: neither be ye sorry; for the joy of the LORD is your strength.' }
+  ];
+
+  var REFLECT_PROMPTS = [
+    'What does this verse mean for you today?',
+    'Where in your life do you need this truth right now?',
+    'Write this verse in your own words.',
+    'What is God asking you to let go of today?',
+    'How can you carry this into the rest of your day?',
+    'What are you grateful for this morning?'
+  ];
+
+  var READING_PLANS = {
+    peace: { name: 'Peace', verses: ['Philippians 4:6-7','Isaiah 26:3','John 14:27','Psalm 4:8','Psalm 91:1-2','Matthew 11:28','Psalm 46:10'] },
+    faith: { name: 'Faith', verses: ['Hebrews 11:1','Mark 11:24','Mark 9:23','Romans 10:9-10','2 Corinthians 5:17','James 1:2-4','Luke 1:37'] },
+    strength: { name: 'Strength', verses: ['Isaiah 41:10','Philippians 4:13','Joshua 1:9','Isaiah 40:31','2 Timothy 1:7','Psalm 27:1','Habakkuk 3:19'] },
+    love: { name: 'Love', verses: ['1 Corinthians 13:4-7','John 3:16','Romans 5:8','Ephesians 4:32','1 John 4:7-8','1 John 4:18','John 15:13'] },
+    hope: { name: 'Hope', verses: ['Jeremiah 29:11','Romans 15:13','Psalm 42:1','Lamentations 3:22-23','Romans 8:28','Hebrews 11:1','Isaiah 40:31'] },
+    gratitude: { name: 'Gratitude', verses: ['Psalm 100:4-5','1 Thessalonians 5:16-18','Psalm 118:24','Colossians 3:23','Psalm 30:5','Philippians 4:6-7','James 1:2-4'] },
+    wisdom: { name: 'Wisdom', verses: ['Proverbs 3:5-6','Proverbs 16:3','James 1:5','Proverbs 18:10','Proverbs 27:17','Romans 12:2','Psalm 119:105'] },
+    comfort: { name: 'Comfort', verses: ['Psalm 23:1','Psalm 34:18','Matthew 11:28','2 Corinthians 4:16-18','Psalm 55:22','Isaiah 41:10','Psalm 73:26'] },
+    revelation: { name: 'Revelation', verses: ['Revelation 1:8','Revelation 3:11','Revelation 3:20','Revelation 12:11','Revelation 21:4','Revelation 21:5','Revelation 22:13'] },
+    forgiveness: { name: 'Forgiveness', verses: ['Matthew 6:14-15','Ephesians 4:32','Colossians 3:13','Mark 11:25','1 John 1:9','Luke 6:37','Psalm 103:12'] },
+    joy: { name: 'Joy', verses: ['Nehemiah 8:10','Psalm 16:11','Psalm 30:5','John 15:11','Romans 15:13','Philippians 4:4','James 1:2-4'] }
+  };
+
+  function dayOfYear(d){ var start = new Date(d.getFullYear(),0,0); return Math.floor((d-start)/86400000); }
+  function todayKey(){
+    var d = new Date();
+    return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+  }
+  function startOfDay(d){ var x = new Date(d); x.setHours(0,0,0,0); return x; }
+  function escapeHTML(s){ return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+  // ---- Auth screen wiring ----
+  var authScreen = document.getElementById('authScreen');
+  var appMain = document.getElementById('appMain');
+  var profileCorner = document.getElementById('profileCorner');
+  var authSub = document.getElementById('authSub');
+  var authTitle = document.getElementById('authTitle');
+  var authEmail = document.getElementById('authEmail');
+  var authPassword = document.getElementById('authPassword');
+  var authSubmit = document.getElementById('authSubmit');
+  var authError = document.getElementById('authError');
+  var authNote = document.getElementById('authNote');
+  var authSwitchText = document.getElementById('authSwitchText');
+  var authSwitchBtn = document.getElementById('authSwitchBtn');
+  var avatarBtn = document.getElementById('avatarBtn');
+  var avatarMenu = document.getElementById('avatarMenu');
+  var avatarEmail = document.getElementById('avatarEmail');
+  var signOutBtn = document.getElementById('signOutBtn');
+  var authMode = 'signin';
+  var emailLabel = document.getElementById('emailLabel'), authSwitchRow = document.getElementById('authSwitchRow'), forgotLink = document.getElementById('forgotLink');
+
+  function setAuthMode(m){
+    authMode = m;
+    authError.classList.add('hidden');
+    authNote.classList.add('hidden');
+    var reset = m === 'reset';
+    emailLabel.style.display = authEmail.style.display = authSwitchRow.style.display = reset ? 'none' : '';
+    forgotLink.style.display = m === 'signin' ? '' : 'none';
+    googleBtn.style.display = authDivider.style.display = reset ? 'none' : '';
+    if(reset){ authTitle.textContent = 'Choose a new password'; authSub.textContent = 'Enter a new password for your account.'; authSubmit.textContent = 'Save new password'; return; }
+    if(m === 'signin'){
+      authTitle.textContent = 'Welcome back';
+      authSub.textContent = 'Sign in to see your journal.';
+      authSubmit.textContent = 'Sign in';
+      authSwitchText.textContent = "Don't have an account?";
+      authSwitchBtn.textContent = 'Sign up';
+    } else {
+      authTitle.textContent = 'Create your account';
+      authSub.textContent = 'Takes about ten seconds.';
+      authSubmit.textContent = 'Sign up';
+      authSwitchText.textContent = 'Already have an account?';
+      authSwitchBtn.textContent = 'Sign in';
+    }
+  }
+  authSwitchBtn.addEventListener('click', function(){ setAuthMode(authMode === 'signin' ? 'signup' : 'signin'); });
+
+  var guestLink = document.getElementById('guestLink');
+  var guestBadge = document.getElementById('guestBadge');
+  var guestSignupBtn = document.getElementById('guestSignupBtn');
+  guestLink.addEventListener('click', function(){
+    isGuest = true;
+    loadGuestData();
+    authScreen.classList.add('hidden');
+    appMain.classList.remove('hidden');
+    guestBadge.classList.remove('hidden');
+    renderInitialState();
+  });
+  guestSignupBtn.addEventListener('click', function(){
+    // Keep the guest's data in localStorage — it gets imported automatically once they sign up.
+    guestBadge.classList.add('hidden');
+    appMain.classList.add('hidden');
+    authScreen.classList.remove('hidden');
+    setAuthMode('signup');
+  });
+
+  authSubmit.addEventListener('click', async function(){
+    var email = authEmail.value.trim();
+    var password = authPassword.value;
+    authError.classList.add('hidden');
+    authNote.classList.add('hidden');
+    if(authMode === 'reset'){
+      if(password.length < 6){ authError.textContent = 'Password must be at least 6 characters.'; authError.classList.remove('hidden'); return; }
+      authSubmit.disabled = true;
+      var ur = await supabase.auth.updateUser({ password: password });
+      authSubmit.disabled = false;
+      if(ur.error){ authError.textContent = ur.error.message; authError.classList.remove('hidden'); return; }
+      window.location.href = window.location.pathname; return;
+    }
+    if(!email || !password){
+      authError.textContent = 'Enter both email and password.';
+      authError.classList.remove('hidden');
+      return;
+    }
+    authSubmit.disabled = true;
+    try{
+      if(authMode === 'signin'){
+        var res = await supabase.auth.signInWithPassword({ email: email, password: password });
+        if(res.error) throw res.error;
+      } else {
+        var res2 = await supabase.auth.signUp({ email: email, password: password });
+        if(res2.error) throw res2.error;
+        if(res2.data && res2.data.user && !res2.data.session){
+          authNote.textContent = 'Check your email to confirm your account, then sign in.';
+          authNote.classList.remove('hidden');
+          setAuthMode('signin');
+        }
+      }
+    } catch(err){
+      authError.textContent = err.message || 'Something went wrong.';
+      authError.classList.remove('hidden');
+    }
+    authSubmit.disabled = false;
+  });
+  [authEmail, authPassword].forEach(function(el){
+    el.addEventListener('keydown', function(e){ if(e.key === 'Enter') authSubmit.click(); });
+  });
+  forgotLink.addEventListener('click', async function(e){
+    e.preventDefault();
+    var em = authEmail.value.trim();
+    authError.classList.add('hidden'); authNote.classList.add('hidden');
+    if(!em){ authError.textContent = 'Type your email above first, then tap Forgot password.'; authError.classList.remove('hidden'); return; }
+    var r = await supabase.auth.resetPasswordForEmail(em, { redirectTo: window.location.origin + window.location.pathname });
+    if(r.error){ authError.textContent = r.error.message; authError.classList.remove('hidden'); }
+    else { authNote.textContent = 'If that email has an account, a reset link is on its way.'; authNote.classList.remove('hidden'); }
+  });
+  var googleBtn = document.getElementById('googleBtn');
+  googleBtn.addEventListener('click', async function(){
+    authError.classList.add('hidden'); authNote.classList.add('hidden');
+    googleBtn.disabled = true;
+    var r = await supabase.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: window.location.origin + window.location.pathname } });
+    if(r.error){ authError.textContent = r.error.message; authError.classList.remove('hidden'); googleBtn.disabled = false; }
+    // On success the browser leaves for Google, then comes back signed in — nothing else to do here.
+  });
+  var themeBtn = document.getElementById('themeBtn');
+  function applyTheme(d){ document.documentElement.classList.toggle('dark', d); themeBtn.textContent = d ? 'Light mode' : 'Dark mode'; }
+  applyTheme(localStorage.getItem('pereselah_theme') === 'dark');
+  themeBtn.addEventListener('click', function(){ var d = !document.documentElement.classList.contains('dark'); localStorage.setItem('pereselah_theme', d ? 'dark' : 'light'); applyTheme(d); });
+  signOutBtn.addEventListener('click', async function(){ await supabase.auth.signOut(); });
+
+  var deleteAccountBtn = document.getElementById('deleteAccountBtn');
+  var CONTACT_EMAIL = 'perefalcon2007@yahoo.com';
+  deleteAccountBtn.addEventListener('click', async function(){
+    if(!currentUserId) return;
+    var ok = window.confirm('Delete your account? This permanently removes your journal, saved verses and settings. This cannot be undone.');
+    if(!ok) return;
+    avatarMenu.classList.add('hidden');
+    deleteAccountBtn.disabled = true;
+    // Try the server-side delete first (removes the login itself). Needs the delete-user
+    // Edge Function deployed to this Supabase project (see delete-user-function.ts).
+    var edgeOk = false;
+    try{
+      var sessionRes = await supabase.auth.getSession();
+      var token = sessionRes.data && sessionRes.data.session && sessionRes.data.session.access_token;
+      if(token){
+        var res = await fetch(SUPABASE_URL + '/functions/v1/delete-user', {
+          method: 'POST',
+          headers: { 'Authorization': 'Bearer ' + token }
+        });
+        edgeOk = res.ok;
+      }
+    } catch(e){ edgeOk = false; }
+    if(!edgeOk){
+      // Fallback: the anon key can only remove this user's own rows (RLS allows deleting your
+      // own data) — it cannot delete the login account itself without the Edge Function above.
+      await supabase.from('journal_entries').delete().eq('user_id', currentUserId);
+      await supabase.from('saved_verses').delete().eq('user_id', currentUserId);
+      await supabase.from('user_settings').delete().eq('user_id', currentUserId);
+    }
+    await supabase.auth.signOut();
+    deleteAccountBtn.disabled = false;
+    alert(edgeOk
+      ? 'Your account has been deleted.'
+      : 'Your journal and saved data have been deleted. To fully remove your login, contact ' + CONTACT_EMAIL + '.');
+  });
+
+  avatarBtn.addEventListener('click', function(e){
+    e.stopPropagation();
+    avatarMenu.classList.toggle('hidden');
+  });
+  document.addEventListener('click', function(e){
+    if(!avatarMenu.classList.contains('hidden') && !e.target.closest('.profile-corner')){
+      avatarMenu.classList.add('hidden');
+    }
+  });
+
+  // ---- Guest mode: try the app without an account. Everything is kept in this
+  // browser's localStorage instead of Supabase. If the person later signs up, whatever
+  // they wrote as a guest is copied into their new account (see importGuestDataIfAny).
+  var isGuest = false;
+  var GUEST_KEY = 'pereselah_guest_data';
+  function saveGuestData(){
+    try{ localStorage.setItem(GUEST_KEY, JSON.stringify({ journal: journal, faves: faves, planState: planState })); } catch(e){}
+  }
+  function loadGuestData(){
+    try{
+      var raw = localStorage.getItem(GUEST_KEY);
+      var d = raw ? JSON.parse(raw) : null;
+      journal = (d && d.journal) || {};
+      faves = (d && d.faves) || [];
+      planState = (d && d.planState) || { id: 'random' };
+    } catch(e){ journal = {}; faves = []; planState = { id: 'random' }; }
+  }
+
+  // ---- Supabase data sync ----
+  // Every sync returns a promise that resolves to { error } so callers can react to failures.
+  function safe(promise, label){
+    return promise.then(function(res){
+      if(res && res.error) console.error('Pereselah sync failed (' + label + '):', res.error);
+      return res || {};
+    }).catch(function(err){
+      console.error('Pereselah sync failed (' + label + '):', err);
+      return { error: err };
+    });
+  }
+
+  // includeReflection = true ONLY when the user is actually saving a reflection.
+  // An upsert only touches the columns it sends, so verse-only syncs can never blank a saved reflection.
+  function syncJournalToday(includeReflection){
+    if(isGuest){ saveGuestData(); return Promise.resolve({}); }
+    if(!currentUserId) return Promise.resolve({ error: new Error('not signed in') });
+    var entry = journal[key] || {};
+    var row = {
+      user_id: currentUserId,
+      entry_date: key,
+      verse_ref: entry.verseRef || null,
+      verse_text: entry.verseText || null
+    };
+    if(includeReflection) row.reflection = entry.reflection || '';
+    return safe(supabase.from('journal_entries').upsert(row, { onConflict: 'user_id,entry_date' }), 'journal');
+  }
+
+  function syncSavedVerse(ref, text, isAdding){
+    if(isGuest){ saveGuestData(); return Promise.resolve({}); }
+    if(!currentUserId) return Promise.resolve({ error: new Error('not signed in') });
+    var q = isAdding
+      ? supabase.from('saved_verses').upsert({ user_id: currentUserId, verse_ref: ref, verse_text: text }, { onConflict: 'user_id,verse_ref' })
+      : supabase.from('saved_verses').delete().eq('user_id', currentUserId).eq('verse_ref', ref);
+    return safe(q, 'saved_verses');
+  }
+
+  function syncPlanState(){
+    if(isGuest){ saveGuestData(); return Promise.resolve({}); }
+    if(!currentUserId) return Promise.resolve({});
+    return safe(supabase.from('user_settings').upsert({
+      user_id: currentUserId, plan_id: planState.id, plan_start_date: planState.startDate || null
+    }, { onConflict: 'user_id' }), 'plan');
+  }
+
+  function syncReminderSettings(){
+    if(isGuest) return Promise.resolve({});
+    if(!currentUserId) return Promise.resolve({});
+    var tz = 'UTC';
+    try{ tz = Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC'; } catch(e){}
+    return safe(supabase.from('user_settings').upsert({
+      user_id: currentUserId,
+      reminder_on: localStorage.getItem('pereselah_reminder_on') === 'on',
+      reminder_time: localStorage.getItem('pereselah_reminder_time') || '07:00',
+      timezone: tz
+    }, { onConflict: 'user_id' }), 'reminder');
+  }
+
+  // ---- Push subscription: lets the reminder arrive even when the app/tab is closed.
+  // Needs the delete-user-style server piece too — see send-reminders-function.ts.
+  var VAPID_PUBLIC_KEY = 'BDGjE80ONF60UGPJLxd0Jg4vmClIO0wFPpEcU1i4ux1ZQpAS8pTtPasAuaVNl0YS7dff-6MdOgpGbxbvu8fFOv8';
+  function urlBase64ToUint8Array(base64){
+    var padding = '='.repeat((4 - base64.length % 4) % 4);
+    var b64 = (base64 + padding).replace(/-/g, '+').replace(/_/g, '/');
+    var raw = window.atob(b64);
+    var out = new Uint8Array(raw.length);
+    for(var i = 0; i < raw.length; i++) out[i] = raw.charCodeAt(i);
+    return out;
+  }
+  async function subscribeToPush(){
+    if(isGuest || !currentUserId) return; // push reminders need a real account to attach to
+    if(!('serviceWorker' in navigator) || !('PushManager' in window)) return;
+    try{
+      var reg = await navigator.serviceWorker.ready;
+      var sub = await reg.pushManager.getSubscription();
+      if(!sub){
+        sub = await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY) });
+      }
+      var json = sub.toJSON();
+      await safe(supabase.from('push_subscriptions').upsert({
+        user_id: currentUserId, endpoint: json.endpoint, p256dh: json.keys.p256dh, auth: json.keys.auth
+      }, { onConflict: 'user_id,endpoint' }), 'push_subscription');
+    } catch(e){ console.error('Push subscribe failed:', e); }
+  }
+  async function unsubscribeFromPush(){
+    if(!('serviceWorker' in navigator) || !('PushManager' in window)) return;
+    try{
+      var reg = await navigator.serviceWorker.ready;
+      var sub = await reg.pushManager.getSubscription();
+      if(sub){
+        var endpoint = sub.endpoint;
+        await sub.unsubscribe();
+        if(currentUserId) await safe(supabase.from('push_subscriptions').delete().eq('user_id', currentUserId).eq('endpoint', endpoint), 'push_unsubscribe');
+      }
+    } catch(e){ console.error('Push unsubscribe failed:', e); }
+  }
+
+  async function fetchAllUserData(){
+    var jRes = await supabase.from('journal_entries').select('*').eq('user_id', currentUserId);
+    journal = {};
+    (jRes.data || []).forEach(function(row){
+      journal[row.entry_date] = { reflection: row.reflection, verseRef: row.verse_ref, verseText: row.verse_text };
+    });
+
+    var fRes = await supabase.from('saved_verses').select('*').eq('user_id', currentUserId).order('saved_at', { ascending: false });
+    faves = (fRes.data || []).map(function(row){ return { ref: row.verse_ref, text: row.verse_text }; });
+
+    var sRes = await supabase.from('user_settings').select('*').eq('user_id', currentUserId).maybeSingle();
+    if(sRes.data){
+      planState = { id: sRes.data.plan_id || 'random', startDate: sRes.data.plan_start_date };
+      localStorage.setItem('pereselah_reminder_on', sRes.data.reminder_on ? 'on' : 'off');
+      localStorage.setItem('pereselah_reminder_time', sRes.data.reminder_time || '07:00');
+    } else {
+      // No settings row yet — don't create one eagerly. It gets created lazily
+      // the first time the user changes their plan or reminder (upsert).
+      planState = { id: 'random' };
+      localStorage.setItem('pereselah_reminder_on', 'off');
+      localStorage.setItem('pereselah_reminder_time', '07:00');
+    }
+  }
+
+  var journal = {};
+  var faves = [];
+  var key = todayKey();
+  var planState = { id: 'random' };
+
+  function computeTodaysRef(){
+    if(!planState || planState.id === 'random'){
+      return VERSE_LIST[dayOfYear(new Date()) % VERSE_LIST.length];
+    }
+    var plan = READING_PLANS[planState.id];
+    if(!plan) return VERSE_LIST[dayOfYear(new Date()) % VERSE_LIST.length];
+    var start = new Date(planState.startDate);
+    var daysSince = Math.floor((startOfDay(new Date()) - startOfDay(start)) / 86400000);
+    var dayIndex = ((daysSince % plan.verses.length) + plan.verses.length) % plan.verses.length;
+    return plan.verses[dayIndex];
+  }
+  function updatePlanDayLabel(){
+    var label = document.getElementById('planDayLabel');
+    if(!planState || planState.id === 'random'){ label.textContent = ''; return; }
+    var plan = READING_PLANS[planState.id];
+    var start = new Date(planState.startDate);
+    var daysSince = Math.floor((startOfDay(new Date()) - startOfDay(start)) / 86400000);
+    var dayIndex = ((daysSince % plan.verses.length) + plan.verses.length) % plan.verses.length;
+    label.textContent = plan.name + ' \u00b7 Day ' + (dayIndex + 1) + ' of ' + plan.verses.length;
+  }
+
+  var todaysRef;
+  var promptIndex = dayOfYear(new Date()) % REFLECT_PROMPTS.length;
+
+  document.getElementById('reflectPrompt').textContent = REFLECT_PROMPTS[promptIndex];
+
+  var planSelect = document.getElementById('planSelect');
+
+  planSelect.addEventListener('change', function(){
+    var planId = planSelect.value;
+    if(planState.id === planId) return;
+    planState = planId === 'random' ? { id: 'random' } : { id: planId, startDate: todayKey() };
+    syncPlanState();
+    todaysRef = computeTodaysRef();
+    updatePlanDayLabel();
+    // Only clear today's cached verse so it refetches; keep any reflection already written.
+    if(journal[key]){ delete journal[key].verseRef; delete journal[key].verseText; }
+    loadVerse();
+  });
+
+  function computeStreak(){
+    var daySet = {};
+    Object.keys(journal).forEach(function(k){
+      if(journal[k].reflection && journal[k].reflection.trim()) daySet[k] = true;
+    });
+    var streak = 0;
+    var cursor = startOfDay(new Date());
+    while(true){
+      var k = cursor.getFullYear() + '-' + String(cursor.getMonth()+1).padStart(2,'0') + '-' + String(cursor.getDate()).padStart(2,'0');
+      if(daySet[k]){ streak++; cursor.setDate(cursor.getDate()-1); } else break;
+    }
+    return streak;
+  }
+  function renderStreak(){ document.getElementById('streakCount').textContent = computeStreak(); }
+  renderStreak();
+
+  var verseLine = document.getElementById('verseLine');
+  var verseRef = document.getElementById('verseRef');
+  var currentVerseText = '';
+
+  function writeVerse(text){
+    var i = 0;
+    var timer = setInterval(function(){
+      i++;
+      var shown = escapeHTML(text.slice(0,i));
+      verseLine.innerHTML = shown + '<svg class="quill" width="18" height="18"><use href="#quillIcon"/></svg>';
+      if(i >= text.length){
+        clearInterval(timer);
+        verseLine.innerHTML = escapeHTML(text);
+        verseRef.textContent = todaysRef;
+        setTimeout(function(){ verseRef.classList.add('show'); }, 250);
+        updateSaveBtn();
+      }
+    }, 45);
+  }
+
+  var basketBtn = document.getElementById('basketBtn');
+  var basketMenu = document.getElementById('basketMenu');
+  basketBtn.addEventListener('click', function(e){
+    e.stopPropagation();
+    basketMenu.classList.toggle('hidden');
+  });
+  document.addEventListener('click', function(e){
+    if(!basketMenu.classList.contains('hidden') && !e.target.closest('.basket-menu') && !e.target.closest('.basket-btn')){
+      basketMenu.classList.add('hidden');
+    }
+  });
+  basketMenu.addEventListener('click', function(e){
+    if(e.target.closest('button')){
+      setTimeout(function(){ basketMenu.classList.add('hidden'); }, 150);
+    }
+  });
+
+  document.getElementById('replayBtn').addEventListener('click', function(){
+    if(!currentVerseText) return;
+    verseRef.classList.remove('show');
+    writeVerse(currentVerseText);
+  });
+
+  function loadVerse(){
+    if(journal[key] && journal[key].verseText){
+      currentVerseText = journal[key].verseText;
+      todaysRef = journal[key].verseRef || todaysRef;
+      verseLine.textContent = currentVerseText;
+      verseRef.textContent = todaysRef;
+      verseRef.classList.add('show');
+      updateSaveBtn();
+      return;
+    }
+    var apiRef = todaysRef.toLowerCase().replace(/\s+/g, '+');
+    fetch('https://bible-api.com/' + apiRef)
+      .then(function(res){ return res.json(); })
+      .then(function(data){
+        currentVerseText = (data.text || '').trim().replace(/\n/g,' ');
+        if(!currentVerseText) throw new Error('empty');
+        journal[key] = journal[key] || {};
+        journal[key].verseRef = todaysRef;
+        journal[key].verseText = currentVerseText;
+        syncJournalToday();
+        writeVerse(currentVerseText);
+      })
+      .catch(function(){
+        // Offline or the API failed — first check if we have this EXACT verse's text
+        // built in (keeps reading plans on track even without internet). Only fall
+        // back to a random offline verse if the exact one truly isn't available.
+        var exactMatch = OFFLINE_VERSES.find(function(v){ return v.ref === todaysRef; });
+        var offlineVerse = exactMatch || OFFLINE_VERSES[dayOfYear(new Date()) % OFFLINE_VERSES.length];
+        todaysRef = offlineVerse.ref;
+        currentVerseText = offlineVerse.text;
+        journal[key] = journal[key] || {};
+        journal[key].verseRef = todaysRef;
+        journal[key].verseText = currentVerseText;
+        syncJournalToday();
+        writeVerse(currentVerseText);
+      });
+  }
+
+  var saveVerseBtn = document.getElementById('saveVerseBtn');
+  function updateSaveBtn(){
+    var isSaved = faves.some(function(f){ return f.ref === todaysRef; });
+    saveVerseBtn.classList.toggle('saved', isSaved);
+    saveVerseBtn.textContent = isSaved ? '♥ Saved' : '♡ Save';
+  }
+  saveVerseBtn.addEventListener('click', function(){
+    if(!currentVerseText) return;
+    var ref = todaysRef, text = currentVerseText;
+    var idx = faves.findIndex(function(f){ return f.ref === ref; });
+    var adding = idx === -1;
+    var removed = null;
+    if(adding){
+      faves.unshift({ ref: ref, text: text, savedAt: new Date().toISOString() });
+    } else {
+      removed = faves.splice(idx, 1)[0];
+    }
+    updateSaveBtn();
+    renderFavorites();
+    syncSavedVerse(ref, text, adding).then(function(res){
+      if(res && res.error){
+        // Save failed: undo the change so the screen never claims something that isn't stored.
+        if(adding){ faves = faves.filter(function(f){ return f.ref !== ref; }); }
+        else if(removed){ faves.unshift(removed); }
+        updateSaveBtn();
+        renderFavorites();
+      }
+    });
+  });
+
+  document.getElementById('shareVerseBtn').addEventListener('click', function(){
+    if(!currentVerseText) return;
+    var text = '\u201c' + currentVerseText + '\u201d \u2014 ' + todaysRef;
+    if(navigator.clipboard){
+      navigator.clipboard.writeText(text);
+      var btn = document.getElementById('shareVerseBtn');
+      var original = btn.textContent;
+      btn.textContent = 'Copied!';
+      setTimeout(function(){ btn.textContent = original; }, 1500);
+    }
+  });
+
+  function roundRectPath(ctx, x, y, w, h, r){
+    ctx.beginPath();
+    ctx.moveTo(x+r, y);
+    ctx.arcTo(x+w, y, x+w, y+h, r);
+    ctx.arcTo(x+w, y+h, x, y+h, r);
+    ctx.arcTo(x, y+h, x, y, r);
+    ctx.arcTo(x, y, x+w, y, r);
+    ctx.closePath();
+  }
+
+  function wrapCanvasText(ctx, text, cx, cy, maxWidth, lineHeight){
+    var words = text.split(' ');
+    var line = '';
+    var lines = [];
+    for(var n=0; n<words.length; n++){
+      var testLine = line + words[n] + ' ';
+      if(ctx.measureText(testLine).width > maxWidth && n > 0){
+        lines.push(line.trim());
+        line = words[n] + ' ';
+      } else {
+        line = testLine;
+      }
+    }
+    lines.push(line.trim());
+    var startY = cy - ((lines.length - 1) * lineHeight) / 2;
+    lines.forEach(function(l, i){ ctx.fillText(l, cx, startY + i * lineHeight); });
+  }
+
+  function downloadVerseCard(){
+    if(!currentVerseText) return;
+    var W = 800, H = 1000;
+    var canvas = document.createElement('canvas');
+    canvas.width = W; canvas.height = H;
+    var ctx = canvas.getContext('2d');
+
+    ctx.fillStyle = '#DCCFA8';
+    ctx.fillRect(0, 0, W, H);
+
+    var padX = 70, padY = 150, panelW = W - padX*2, panelH = H - padY*2;
+    var panelGrad = ctx.createLinearGradient(0, padY, 0, padY + panelH);
+    panelGrad.addColorStop(0, '#F1E4C0');
+    panelGrad.addColorStop(0.5, '#E9D9AC');
+    panelGrad.addColorStop(1, '#EFE0B8');
+    ctx.fillStyle = panelGrad;
+    ctx.fillRect(padX, padY, panelW, panelH);
+
+    function drawRod(y){
+      var rodGrad = ctx.createLinearGradient(0, y, 0, y + 34);
+      rodGrad.addColorStop(0, '#8A5A2E');
+      rodGrad.addColorStop(0.3, '#6B4423');
+      rodGrad.addColorStop(0.6, '#4A2E15');
+      rodGrad.addColorStop(1, '#8A5A2E');
+      ctx.fillStyle = rodGrad;
+      roundRectPath(ctx, padX - 16, y, panelW + 32, 34, 17);
+      ctx.fill();
+      ctx.fillStyle = '#5C3A1C';
+      ctx.beginPath(); ctx.ellipse(padX - 26, y + 17, 20, 26, 0, 0, Math.PI*2); ctx.fill();
+      ctx.beginPath(); ctx.ellipse(padX + panelW + 26, y + 17, 20, 26, 0, 0, Math.PI*2); ctx.fill();
+    }
+    drawRod(padY - 24);
+    drawRod(padY + panelH - 10);
+
+    ctx.textAlign = 'center';
+    ctx.fillStyle = '#6B4E20';
+    ctx.font = '600 20px Georgia, serif';
+    ctx.fillText('P E R E S E L A H', W/2, padY + 46);
+
+    ctx.fillStyle = '#3E2A10';
+    ctx.font = 'italic 32px Georgia, serif';
+    wrapCanvasText(ctx, '\u201c' + currentVerseText + '\u201d', W/2, padY + panelH/2 - 20, panelW - 90, 44);
+
+    ctx.font = 'italic 20px Georgia, serif';
+    ctx.fillStyle = '#8A6E3A';
+    ctx.fillText(todaysRef, W/2, padY + panelH - 46);
+
+    var link = document.createElement('a');
+    link.download = 'pereselah-' + todaysRef.replace(/[^a-z0-9]/gi, '-').toLowerCase() + '.png';
+    link.href = canvas.toDataURL('image/png');
+    link.click();
+  }
+
+  document.getElementById('downloadVerseBtn').addEventListener('click', downloadVerseCard);
+
+  // ---- Listen (text-to-speech) ----
+  var listenBtn = document.getElementById('listenBtn');
+  listenBtn.addEventListener('click', function(){
+    if(!currentVerseText) return;
+    if(!('speechSynthesis' in window)){
+      alert('Your browser doesn\u2019t support reading text aloud.');
+      return;
+    }
+    if(window.speechSynthesis.speaking){
+      window.speechSynthesis.cancel();
+      listenBtn.classList.remove('speaking');
+      listenBtn.textContent = '🔊 Listen';
+      return;
+    }
+    var utter = new SpeechSynthesisUtterance(currentVerseText);
+    utter.rate = 0.9;
+    utter.onend = function(){
+      listenBtn.classList.remove('speaking');
+      listenBtn.textContent = '🔊 Listen';
+    };
+    window.speechSynthesis.speak(utter);
+    listenBtn.classList.add('speaking');
+    listenBtn.textContent = '⏸ Stop';
+  });
+
+  // ---- Share (native share sheet, falls back to WhatsApp web link) ----
+  document.getElementById('shareWaBtn').addEventListener('click', function(){
+    if(!currentVerseText) return;
+    var text = '\u201c' + currentVerseText + '\u201d \u2014 ' + todaysRef + '\n\nvia Pereselah';
+    if(navigator.share){
+      navigator.share({ title: 'Pereselah', text: text }).catch(function(){});
+    } else {
+      window.open('https://wa.me/?text=' + encodeURIComponent(text), '_blank');
+    }
+  });
+
+  // ---- Daily reminder (browser notification, works while the app/tab is open) ----
+  var reminderToggle = document.getElementById('reminderToggle');
+  var reminderTimeInput = document.getElementById('reminderTime');
+  var STORAGE_REMINDER_ON = 'pereselah_reminder_on';
+  var STORAGE_REMINDER_TIME = 'pereselah_reminder_time';
+  var STORAGE_REMINDER_LAST = 'pereselah_reminder_last_fired';
+
+  var savedTime = localStorage.getItem(STORAGE_REMINDER_TIME);
+  if(savedTime) reminderTimeInput.value = savedTime;
+
+  function updateReminderBtn(){
+    var on = localStorage.getItem(STORAGE_REMINDER_ON) === 'on' && 'Notification' in window && Notification.permission === 'granted';
+    reminderToggle.classList.toggle('on', on);
+    reminderToggle.textContent = on ? '🔔 Reminder on' : '🔔 Daily reminder';
+  }
+  updateReminderBtn();
+
+  reminderToggle.addEventListener('click', async function(){
+    if(!('Notification' in window)){
+      alert('This browser does not support notifications.');
+      return;
+    }
+    if(localStorage.getItem(STORAGE_REMINDER_ON) === 'on'){
+      localStorage.setItem(STORAGE_REMINDER_ON, 'off');
+      updateReminderBtn();
+      syncReminderSettings();
+      unsubscribeFromPush();
+      return;
+    }
+    var perm = await Notification.requestPermission();
+    if(perm === 'granted'){
+      localStorage.setItem(STORAGE_REMINDER_ON, 'on');
+      new Notification('Pereselah', { body: 'Reminders are on \u2014 we\u2019ll nudge you at ' + reminderTimeInput.value + ' each day, even if the app is closed.' });
+      subscribeToPush();
+    }
+    updateReminderBtn();
+    syncReminderSettings();
+  });
+
+  reminderTimeInput.addEventListener('change', function(){
+    localStorage.setItem(STORAGE_REMINDER_TIME, reminderTimeInput.value);
+    syncReminderSettings();
+  });
+
+  setInterval(function(){
+    if(localStorage.getItem(STORAGE_REMINDER_ON) !== 'on') return;
+    if(!('Notification' in window) || Notification.permission !== 'granted') return;
+    var now = new Date();
+    var nowHM = String(now.getHours()).padStart(2,'0') + ':' + String(now.getMinutes()).padStart(2,'0');
+    var target = localStorage.getItem(STORAGE_REMINDER_TIME) || '07:00';
+    var lastFired = localStorage.getItem(STORAGE_REMINDER_LAST);
+    if(nowHM === target && lastFired !== todayKey()){
+      new Notification('Pereselah', { body: '\ud83d\ude4f Time for your Selah \u2014 today\u2019s verse is waiting.' });
+      localStorage.setItem(STORAGE_REMINDER_LAST, todayKey());
+    }
+  }, 60000);
+
+  var reflectionInput = document.getElementById('reflectionInput');
+
+  var savedNote = document.getElementById('savedNote');
+  var saveReflectionBtn = document.getElementById('saveReflectionBtn');
+  var noteTimer = null;
+  function showNote(msg, isError){
+    savedNote.textContent = msg;
+    savedNote.classList.toggle('err', !!isError);
+    savedNote.classList.add('show');
+    clearTimeout(noteTimer);
+    noteTimer = setTimeout(function(){ savedNote.classList.remove('show'); }, isError ? 4500 : 2000);
+  }
+
+  saveReflectionBtn.addEventListener('click', function(){
+    var entry = journal[key] = journal[key] || {};
+    var prev = { reflection: entry.reflection, verseRef: entry.verseRef, verseText: entry.verseText };
+    entry.reflection = reflectionInput.value;
+    entry.verseRef = todaysRef;
+    entry.verseText = currentVerseText;
+    entry.date = key;
+    saveReflectionBtn.disabled = true;
+    syncJournalToday(true).then(function(res){
+      saveReflectionBtn.disabled = false;
+      if(res && res.error){
+        entry.reflection = prev.reflection;
+        entry.verseRef = prev.verseRef;
+        entry.verseText = prev.verseText;
+        showNote('Not saved \u2014 check your connection and try again.', true);
+        return;
+      }
+      renderStreak();
+      renderHistory();
+      showNote('Saved', false);
+      checkCelebrations(computeStreak());
+    });
+  });
+
+  function renderHistory(){
+    var panel = document.getElementById('historyPanel');
+    var entries = Object.keys(journal)
+      .filter(function(k){ return journal[k].reflection && journal[k].reflection.trim() && jMatch(k); })
+      .sort().reverse();
+    if(entries.length === 0){
+      panel.innerHTML = '<div class="hist-empty"><span class="caveat">Nothing written yet.</span>Your reflections will appear here once you save one.</div>';
+      return;
+    }
+    var html = '';
+    entries.forEach(function(k){
+      var e = journal[k];
+      html += '<div class="hist-item">' +
+        '<div class="hist-date">' + k + '</div>' +
+        '<div class="hist-verse-ref">' + escapeHTML(e.verseRef || '') + '</div>' +
+        '<div class="hist-verse-text">\u201c' + escapeHTML(e.verseText || '') + '\u201d</div>' +
+        '<div class="hist-reflection">' + escapeHTML(e.reflection) + '</div>' +
+      '</div>';
+    });
+    panel.innerHTML = html;
+  }
+  renderHistory();
+
+  function renderFavorites(){
+    var panel = document.getElementById('favoritesPanel');
+    if(faves.length === 0){
+      panel.innerHTML = '<div class="hist-empty"><span class="caveat">No saved verses yet.</span>Tap \u2661 Save on a verse to keep it here.</div>';
+      return;
+    }
+    var html = '';
+    faves.forEach(function(f){
+      html += '<div class="fav-item"><div class="fav-ref">' + escapeHTML(f.ref) + '</div><div class="fav-text">\u201c' + escapeHTML(f.text) + '\u201d</div></div>';
+    });
+    panel.innerHTML = html;
+  }
+  renderFavorites();
+
+  var jSearch = document.getElementById('jSearch'), jTools = document.getElementById('jTools'), calendarPanel = document.getElementById('calendarPanel');
+  function jMatch(k){ var q = (jSearch && jSearch.value || '').trim().toLowerCase(); if(!q) return true; var e = journal[k]; return (k + ' ' + (e.verseRef||'') + ' ' + (e.verseText||'') + ' ' + e.reflection).toLowerCase().indexOf(q) !== -1; }
+  jSearch.addEventListener('input', renderHistory);
+  document.getElementById('jExport').addEventListener('click', function(){
+    var ks = Object.keys(journal).filter(function(k){ return journal[k].reflection && journal[k].reflection.trim(); }).sort();
+    var t = 'PERESELAH JOURNAL\n\n' + ks.map(function(k){ var e = journal[k]; return k + '\n' + (e.verseRef||'') + '\n"' + (e.verseText||'') + '"\n\n' + e.reflection + '\n'; }).join('\n----------\n\n');
+    var a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([t], { type: 'text/plain' })); a.download = 'pereselah-journal.txt'; a.click();
+  });
+  var calMonth = new Date(); calMonth.setDate(1);
+  function renderCalendar(){
+    var y = calMonth.getFullYear(), m = calMonth.getMonth(), first = new Date(y, m, 1).getDay(), days = new Date(y, m + 1, 0).getDate();
+    var h = '<div class="cal-head"><button id="calPrev">\u2039</button><span>' + calMonth.toLocaleDateString('en-US', { month:'long', year:'numeric' }) + '</span><button id="calNext">\u203a</button></div><div class="cal-grid">';
+    'SMTWTFS'.split('').forEach(function(d){ h += '<b>' + d + '</b>'; });
+    for(var i = 0; i < first; i++) h += '<i></i>';
+    for(var d = 1; d <= days; d++){
+      var k = y + '-' + String(m + 1).padStart(2,'0') + '-' + String(d).padStart(2,'0');
+      var on = journal[k] && journal[k].reflection && journal[k].reflection.trim();
+      h += '<i class="' + (on ? 'on' : '') + (k === key ? ' today' : '') + '">' + d + '</i>';
+    }
+    calendarPanel.innerHTML = h + '</div><div class="cal-note">' + computeStreak() + ' day streak \u00b7 filled days have a reflection</div>';
+    document.getElementById('calPrev').onclick = function(){ calMonth.setMonth(calMonth.getMonth() - 1); renderCalendar(); };
+    document.getElementById('calNext').onclick = function(){ calMonth.setMonth(calMonth.getMonth() + 1); renderCalendar(); };
+  }
+  function showTab(tab){
+    historyPanel.style.display = tab === 'history' ? 'block' : 'none';
+    favoritesPanel.style.display = tab === 'favorites' ? 'block' : 'none';
+    calendarPanel.style.display = tab === 'calendar' ? 'block' : 'none';
+    jTools.style.display = tab === 'history' ? 'flex' : 'none';
+    if(tab === 'calendar') renderCalendar();
+  }
+  var tabBtns = document.querySelectorAll('.tab-btn');
+  var historyPanel = document.getElementById('historyPanel');
+  var favoritesPanel = document.getElementById('favoritesPanel');
+  tabBtns.forEach(function(btn){
+    btn.addEventListener('click', function(){
+      tabBtns.forEach(function(b){ b.classList.remove('active'); });
+      btn.classList.add('active');
+      showTab(btn.getAttribute('data-tab'));
+    });
+  });
+
+  var journalOverlay = document.getElementById('journalOverlay');
+  function openJournalOverlay(tab){
+    journalOverlay.classList.remove('hidden');
+    profileCorner.classList.add('on-overlay');
+    installBtn.classList.add('hidden');
+    tabBtns.forEach(function(b){ b.classList.toggle('active', b.getAttribute('data-tab') === tab); });
+    showTab(tab);
+    window.scrollTo(0, 0);
+  }
+  document.getElementById('openJournalBtn').addEventListener('click', function(){ openJournalOverlay('history'); });
+  document.getElementById('openFavesBtn').addEventListener('click', function(){ openJournalOverlay('favorites'); });
+  document.getElementById('journalBackBtn').addEventListener('click', function(){
+    journalOverlay.classList.add('hidden');
+    profileCorner.classList.remove('on-overlay');
+    refreshInstallBtn();
+  });
+
+  // ---- Celebration confetti ----
+  function celebrate(){
+    var pieces = ['🎉','🎊','✨','🙌'];
+    for(var i = 0; i < 44; i++){
+      (function(){
+        var el = document.createElement('div');
+        el.textContent = pieces[Math.floor(Math.random() * pieces.length)];
+        el.style.position = 'fixed';
+        el.style.left = (Math.random() * 100) + 'vw';
+        el.style.top = '-30px';
+        el.style.fontSize = (14 + Math.random() * 16) + 'px';
+        el.style.zIndex = '999';
+        el.style.pointerEvents = 'none';
+        el.style.transition = 'transform 2.3s ease-in, opacity 2.3s ease-in';
+        document.body.appendChild(el);
+        requestAnimationFrame(function(){
+          el.style.transform = 'translateY(' + (100 + Math.random() * 20) + 'vh) rotate(' + (Math.random() * 360) + 'deg)';
+          el.style.opacity = '0';
+        });
+        setTimeout(function(){ el.remove(); }, 2500);
+      })();
+    }
+  }
+
+  function checkCelebrations(newStreak){
+    var celebrated = false;
+
+    if(planState && planState.id !== 'random'){
+      var plan = READING_PLANS[planState.id];
+      if(plan){
+        var daysSince = Math.floor((startOfDay(new Date()) - startOfDay(new Date(planState.startDate))) / 86400000);
+        var dayIndex = ((daysSince % plan.verses.length) + plan.verses.length) % plan.verses.length;
+        if(dayIndex === plan.verses.length - 1){
+          var completedKey = 'pereselah_completed_' + planState.id + '_' + planState.startDate;
+          if(!localStorage.getItem(completedKey)){
+            localStorage.setItem(completedKey, 'yes');
+            celebrated = true;
+          }
+        }
+      }
+    }
+
+    if(newStreak > 0 && newStreak % 7 === 0){
+      var lastCelebrated = parseInt(localStorage.getItem('pereselah_last_streak_celebrated') || '0', 10);
+      if(newStreak > lastCelebrated){
+        localStorage.setItem('pereselah_last_streak_celebrated', String(newStreak));
+        celebrated = true;
+      }
+    }
+
+    if(celebrated) celebrate();
+  }
+
+  // If this is a new account and it's still empty, and this browser has guest-mode
+  // data sitting in localStorage, copy it up so nothing written before sign-up is lost.
+  function importGuestDataIfAny(){
+    var raw;
+    try{ raw = localStorage.getItem(GUEST_KEY); } catch(e){ return; }
+    if(!raw) return;
+    var accountIsEmpty = Object.keys(journal).length === 0 && faves.length === 0;
+    if(!accountIsEmpty){ try{ localStorage.removeItem(GUEST_KEY); } catch(e){} return; }
+    var d;
+    try{ d = JSON.parse(raw); } catch(e){ return; }
+    var guestJournal = (d && d.journal) || {};
+    var guestFaves = (d && d.faves) || [];
+    Object.keys(guestJournal).forEach(function(k){ journal[k] = guestJournal[k]; });
+    faves = guestFaves.concat(faves);
+    if(d && d.planState) planState = d.planState;
+    var savedKey = key;
+    Object.keys(guestJournal).forEach(function(k){
+      key = k;
+      syncJournalToday(true);
+      key = savedKey;
+    });
+    guestFaves.forEach(function(f){ syncSavedVerse(f.ref, f.text, true); });
+    syncPlanState();
+    try{ localStorage.removeItem(GUEST_KEY); } catch(e){}
+  }
+
+  function renderInitialState(){
+    todaysRef = computeTodaysRef();
+    document.getElementById('todayLabel').textContent = new Date().toLocaleDateString('en-US', { weekday:'short', month:'short', day:'numeric' });
+    updatePlanDayLabel();
+    planSelect.value = planState.id || 'random';
+    if(journal[key] && journal[key].reflection){ reflectionInput.value = journal[key].reflection; }
+    else { reflectionInput.value = ''; }
+    var savedTime = localStorage.getItem('pereselah_reminder_time');
+    if(savedTime) reminderTimeInput.value = savedTime;
+    updateReminderBtn();
+    renderStreak();
+    renderHistory();
+    renderFavorites();
+    loadVerse();
+  }
+
+  var recovering = false;
+  // ---- Install button ----
+  // Chrome/Edge/Android fire 'beforeinstallprompt' and let us trigger their native install dialog.
+  // Safari on iPhone never fires that event, so there we just explain the manual Share -> Add to
+  // Home Screen step instead. Either way, the button hides itself once the app is already installed.
+  var installBtn = document.getElementById('installBtn');
+  var deferredInstallPrompt = null;
+  var isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent) && !window.MSStream;
+  var isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+
+  function refreshInstallBtn(){
+    var eligible = !isStandalone && (!!deferredInstallPrompt || isIOS);
+    installBtn.classList.toggle('hidden', !eligible);
+  }
+  refreshInstallBtn();
+
+  window.addEventListener('beforeinstallprompt', function(e){
+    e.preventDefault();
+    deferredInstallPrompt = e;
+    refreshInstallBtn();
+  });
+
+  installBtn.addEventListener('click', async function(){
+    if(deferredInstallPrompt){
+      installBtn.disabled = true;
+      try{ await deferredInstallPrompt.prompt(); await deferredInstallPrompt.userChoice; } catch(e){}
+      deferredInstallPrompt = null;
+      installBtn.disabled = false;
+      refreshInstallBtn();
+    } else if(isIOS){
+      alert('To install Pereselah: tap the Share icon below, then choose "Add to Home Screen".');
+    }
+  });
+
+  window.addEventListener('appinstalled', function(){
+    deferredInstallPrompt = null;
+    isStandalone = true;
+    refreshInstallBtn();
+  });
+
+  supabase.auth.onAuthStateChange(function(event, session){
+    if(event === 'PASSWORD_RECOVERY'){ recovering = true; authScreen.classList.remove('hidden'); appMain.classList.add('hidden'); profileCorner.classList.add('hidden'); setAuthMode('reset'); return; }
+    if(recovering) return;
+    if(session && session.user){
+      localStorage.setItem('pereselah_seen', '1');
+      // Supabase can re-fire the signed-in event (e.g. when you return to the tab).
+      // Only run the full load when the signed-in user actually changes, so typed text isn't wiped.
+      var isNewUser = session.user.id !== currentUserId;
+      currentUserId = session.user.id;
+      currentUserEmail = session.user.email || '';
+      authScreen.classList.add('hidden');
+      appMain.classList.remove('hidden');
+      profileCorner.classList.remove('hidden');
+      avatarBtn.textContent = currentUserEmail.charAt(0).toUpperCase();
+      avatarEmail.textContent = currentUserEmail;
+      isGuest = false;
+      guestBadge.classList.add('hidden');
+      if(isNewUser){
+        fetchAllUserData()
+          .catch(function(err){ console.error('Pereselah load failed:', err); })
+          .then(function(){ importGuestDataIfAny(); renderInitialState(); });
+      }
+    } else {
+      currentUserId = null;
+      currentUserEmail = null;
+      // Clear the previous user's data so it can never flash for the next person.
+      journal = {};
+      faves = [];
+      planState = { id: 'random' };
+      currentVerseText = '';
+      reflectionInput.value = '';
+      verseLine.textContent = '';
+      verseRef.classList.remove('show');
+      journalOverlay.classList.add('hidden');
+      profileCorner.classList.remove('on-overlay');
+      authScreen.classList.remove('hidden');
+      appMain.classList.add('hidden');
+      profileCorner.classList.add('hidden');
+      avatarMenu.classList.add('hidden');
+      authEmail.value = '';
+      authPassword.value = '';
+    }
+  });
+
+  // New visitors land on Sign up; returning ones on Sign in. ?mode=signup or ?mode=signin overrides.
+  var qm = new URLSearchParams(window.location.search).get('mode');
+  setAuthMode(qm === 'signin' ? 'signin' : (qm === 'signup' || !localStorage.getItem('pereselah_seen')) ? 'signup' : 'signin');
+})();
+</script>
+
+</body>
+</html>
